@@ -225,7 +225,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
-        const ADMIN_EMAIL = "eliperez235@gmail.com";
+        
+        // CORREO DE ADMINISTRADOR ACTUALIZADO
+        const ADMIN_EMAIL = "Danielvale3006@gmail.com";
 
         const CONFIG_FECHAS_GP = {
             cierrePole: new Date("2026-10-10T14:00:00"),
@@ -467,7 +469,6 @@
             } catch (e) { console.error(e); }
         }
 
-        // FUNCIONES PARA EL MODAL DE "VER MI PRONÓSTICO"
         window.abrirModalMiPronostico = async function() {
             const user = auth.currentUser;
             if (!user) { alert("Inicia sesión para ver tu pronóstico."); return; }
