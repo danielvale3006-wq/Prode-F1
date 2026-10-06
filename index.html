@@ -59,7 +59,8 @@
             
             <div class="flex items-center space-x-4">
                 <div id="gp-icono-bandera" class="w-14 h-14 md:w-16 md:h-16 bg-black/60 flex items-center justify-center rounded-2xl border border-zinc-700/80 shadow-inner overflow-hidden shrink-0">
-                    <span class="text-red-500 font-black">GP</span>
+                    <!-- Imagen personalizada integrada -->
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTD6zpAfdeWFnexo4z9Rbee0lKG8YUf146Aa_fZ2q0ZNOEy_AfrymYXFojghBVDxnMSGYCnN7yKmE06rHUFhNnf3sgFnczWVnZ9MIxqA&s=10" alt="Logo GP" class="w-full h-full object-cover">
                 </div>
                 <div class="space-y-1">
                     <div class="flex items-center space-x-2">
@@ -311,7 +312,7 @@
 
     <!-- Lógica Local Simple (Sin Firebase Auth, ideal para GitHub Pages) -->
     <script>
-        const ADMIN_USER = "daniel"; // Puedes cambiar aquí el usuario admin si deseas
+        const ADMIN_USER = "daniel"; 
 
         const CALENDARIO_F1_2026 = [
             { id: "GP_Singapur_2026", nombre: "GP de Singapur", codigo: "sg", cierrePole: "2026-10-10T14:00:00", cierreCarrera: "2026-10-11T08:00:00" },
@@ -369,9 +370,6 @@
 
         function inicializarTextosDinamicos() {
             document.getElementById("gp-titulo-principal").textContent = `${GP_ACTUAL.nombre}`;
-            
-            const contenedorBandera = document.getElementById("gp-icono-bandera");
-            contenedorBandera.innerHTML = `<img src="https://flagcdn.com/w80/${GP_ACTUAL.codigo.toLowerCase()}.png" alt="${GP_ACTUAL.nombre}" class="w-full h-full object-cover rounded-xl">`;
 
             const fPole = new Date(GP_ACTUAL.cierrePole);
             const fCarrera = new Date(GP_ACTUAL.cierreCarrera);
@@ -518,7 +516,6 @@
             }
         }
 
-        // Sistema de autenticación simple por localStorage
         window.abrirModalAuth = function() {
             document.getElementById("modal-auth").classList.remove("hidden");
         }
@@ -538,7 +535,6 @@
             usuarioActual = user;
             localStorage.setItem("prode_usuario_actual", user);
             
-            // Guardar credenciales simples en localStorage si no existen
             let usuariosDB = JSON.parse(localStorage.getItem("prode_usuarios_db") || "{}");
             if (!usuariosDB[user]) {
                 usuariosDB[user] = pass;
@@ -588,7 +584,6 @@
             window.location.reload();
         }
 
-        // Guardar pronósticos localmente
         window.guardarPoleLocal = function() {
             if (!usuarioActual) {
                 alert("Debes iniciar sesión con tu nombre de usuario para guardar.");
@@ -723,7 +718,6 @@
             }
         }
 
-        // Panel de Admin y cálculo de puntos automático local
         window.ejecutarCalculoAutomaticoPuntos = function() {
             if (!usuarioActual || usuarioActual.toLowerCase() !== ADMIN_USER.toLowerCase()) {
                 alert("No tienes permisos de administrador.");
@@ -741,12 +735,10 @@
                 top10Real.push(val);
             }
 
-            // Guardar resultados reales
             let resultadosReales = JSON.parse(localStorage.getItem("prode_resultados_reales") || "{}");
             resultadosReales[ID_GP_ACTUAL] = { pole: poleReal, top10: top10Real };
             localStorage.setItem("prode_resultados_reales", JSON.stringify(resultadosReales));
 
-            // Calcular puntos de cada usuario
             let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
             let gpVotos = pronosticos[ID_GP_ACTUAL] || {};
             let puntuacionesFecha = {};
@@ -755,12 +747,10 @@
                 let pts = 0;
                 let pron = gpVotos[user];
 
-                // Puntos Pole (+25)
                 if (pron.pole && pron.pole === poleReal) {
                     pts += 25;
                 }
 
-                // Puntos Top 10
                 if (pron.top10 && Array.isArray(pron.top10)) {
                     let aciertosPodioExacto = 0;
                     let aciertosTop5Exacto = true;
@@ -774,7 +764,7 @@
                             let diferencia = Math.abs(puestoPron - puestoReal);
 
                             if (diferencia === 0) {
-                                pts += 25; // Puesto exacto
+                                pts += 25;
                                 if (puestoPron <= 3) aciertosPodioExacto++;
                             } else if (diferencia === 1) {
                                 pts += 15;
@@ -791,7 +781,6 @@
                         }
                     });
 
-                    // Bonos
                     if (aciertosPodioExacto === 3) pts += 25;
                     if (aciertosTop5Exacto && pron.top10.length >= 5) pts += 50;
                 }
@@ -803,7 +792,6 @@
             puntosFechasDB[ID_GP_ACTUAL] = puntuacionesFecha;
             localStorage.setItem("prode_puntos_fechas", JSON.stringify(puntosFechasDB));
 
-            // Actualizar Tabla General
             actualizarTablaGeneralAcumulada();
 
             alert("¡Resultados guardados y puntos calculados con éxito!");
@@ -825,7 +813,6 @@
         }
 
         function cargarTablas() {
-            // Tabla Fecha
             let puntosFechasDB = JSON.parse(localStorage.getItem("prode_puntos_fechas") || "{}");
             let fechaUsers = puntosFechasDB[ID_GP_ACTUAL] || {};
             let listaFechaHTML = document.getElementById("lista-tabla-fecha");
@@ -842,7 +829,6 @@
                 listaFechaHTML.innerHTML = html;
             }
 
-            // Tabla General
             let generalDB = JSON.parse(localStorage.getItem("prode_tabla_general") || "{}");
             let listaGeneralHTML = document.getElementById("lista-tabla-general");
             let arrayGeneral = Object.entries(generalDB).sort((a, b) => b[1] - a[1]);
@@ -859,7 +845,6 @@
             }
         }
 
-        // Navegación de pestañas
         function configurarNavegacion() {
             const navPronostico = document.getElementById("nav-pronostico");
             const navTabla = document.getElementById("nav-tabla");
