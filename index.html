@@ -257,9 +257,9 @@
 
     <!-- Firebase y Lógica -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",
@@ -279,7 +279,6 @@
         
         const ADMIN_EMAIL = "Danielvale3006@gmail.com";
 
-        // CALENDARIO OFICIAL 2026 CON ICONOS/BANDERAS
         const CALENDARIO_F1_2026 = [
             { id: "GP_Singapur_2026", nombre: "GP de Singapur", icono: "🇸🇬", cierrePole: "2026-10-10T14:00:00", cierreCarrera: "2026-10-11T08:00:00" },
             { id: "GP_EEUU_2026", nombre: "GP de Estados Unidos", icono: "🇺🇸", cierrePole: "2026-10-24T14:00:00", cierreCarrera: "2026-10-25T15:00:00" },
@@ -323,13 +322,11 @@
         ];
 
         document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => {
-                inicializarTextosDinamicos();
-                inicializarInterfaz();
-                configurarAutenticacion(auth, db);
-                configurarNavegacion();
-                verificarLimitesTiempo();
-            }, 50);
+            inicializarTextosDinamicos();
+            inicializarInterfaz();
+            configurarAutenticacion(auth, db);
+            configurarNavegacion();
+            verificarLimitesTiempo();
         });
 
         function inicializarTextosDinamicos() {
