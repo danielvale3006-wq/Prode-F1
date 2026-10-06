@@ -122,8 +122,8 @@
                         <h3 class="font-black text-sm uppercase tracking-wider">Bonos Especiales</h3>
                     </div>
                     <ul class="text-xs text-zinc-300 space-y-2">
-                        <li>• **Bono Podio (P1, P2 y P3 exactos):** <strong class="text-red-500">+25 pts extra</strong></li>
-                        <li>• **Bono Top 5 (Primeros 5 puestos exactos):** <strong class="text-red-500">+50 pts extra</strong></li>
+                        <li>• <strong>Bono Podio (P1, P2 y P3 exactos):</strong> <strong class="text-red-500">+25 pts extra</strong></li>
+                        <li>• <strong>Bono Top 5 (Primeros 5 puestos exactos):</strong> <strong class="text-red-500">+50 pts extra</strong></li>
                     </ul>
                 </div>
 
@@ -198,9 +198,11 @@
         ];
 
         document.addEventListener("DOMContentLoaded", () => {
-            inicializarInterfaz();
-            configurarAutenticacion(auth, db);
-            configurarNavegacion();
+            setTimeout(() => {
+                inicializarInterfaz();
+                configurarAutenticacion(auth, db);
+                configurarNavegacion();
+            }, 50);
         });
 
         function inicializarInterfaz() {
@@ -231,4 +233,209 @@
 
                     div.innerHTML = `
                         <span class="w-6 h-6 flex items-center justify-center bg-red-600 text-white font-black rounded-lg text-xs shadow-md shadow-red-600/30">${i < 10 ? '0' + i : i}</span>
-                        <select id="puesto-${i}" onchange="actualizarContadorCompletados()" class="w-full bg-black text-white border border-zinc-700 rounded-lg p-2 text-xs focus:outline-none focus:border-red
+                        <select id="puesto-${i}" onchange="actualizarContadorCompletados()" class="w-full bg-black text-white border border-zinc-700 rounded-lg p-2 text-xs focus:outline-none focus:border-red-600 transition">
+                            ${optionsHtml}
+                        </select>
+                    `;
+                    top10Container.appendChild(div);
+                }
+            }
+
+            renderizarParrilla(pilotos2026);
+
+            if (buscarPilotoInput) {
+                buscarPilotoInput.addEventListener("input", (e) => {
+                    const texto = e.target.value.toLowerCase();
+                    const filtrados = pilotos2026.filter(p => p.toLowerCase().includes(texto));
+                    renderizarParrilla(filtrados);
+                });
+            }
+        }
+
+        function renderizarParrilla(listaPilotos) {
+            const parrillaContainer = document.getElementById("parrilla-container");
+            if (!parrillaContainer) return;
+            
+            parrillaContainer.innerHTML = "";
+            listaPilotos.forEach(piloto => {
+                let btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "text-left text-[11px] bg-zinc-900 hover:bg-red-600 text-zinc-300 hover:text-white p-2.5 rounded-lg border border-zinc-800 hover:border-red-500 transition font-medium truncate cursor-pointer shadow-sm";
+                btn.textContent = piloto;
+                btn.onclick = () => asignarSiguientePuesto(piloto);
+                parrillaContainer.appendChild(btn);
+            });
+        }
+
+        window.asignarSiguientePuesto = function(piloto) {
+            for (let i = 1; i <= 10; i++) {
+                let select = document.getElementById(`puesto-${i}`);
+                if (select && !select.value) {
+                    select.value = piloto;
+                    actualizarContadorCompletados();
+                    break;
+                }
+            }
+        }
+
+        window.actualizarContadorCompletados = function() {
+            let completados = 0;
+            for (let i = 1; i <= 10; i++) {
+                let select = document.getElementById(`puesto-${i}`);
+                if (select && select.value) completados++;
+            }
+            const contadorEl = document.getElementById("contador-completados");
+            if (contadorEl) contadorEl.textContent = `${completados} / 10 completados`;
+        }
+
+        function configurarNavegacion() {
+            const navPronostico = document.getElementById("nav-pronostico");
+            const navTabla = document.getElementById("nav-tabla");
+            const navReglas = document.getElementById("nav-reglas");
+
+            const seccionPronostico = document.getElementById("seccion-pronostico");
+            const seccionTabla = document.getElementById("seccion-tabla");
+            const seccionReglas = document.getElementById("seccion-reglas");
+
+            function cambiarVista(activa) {
+                [navPronostico, navTabla, navReglas].forEach(el => el.className = "text-zinc-400 hover:text-white transition pb-1 font-medium");
+                [seccionPronostico, seccionTabla, seccionReglas].forEach(el => el.classList.add("hidden"));
+
+                if (activa === 'pronostico') {
+                    navPronostico.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                    seccionPronostico.classList.remove("hidden");
+                } else if (activa === 'tabla') {
+                    navTabla.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                    seccionTabla.classList.remove("hidden");
+                    cargarTablaGeneral();
+                } else if (activa === 'reglas') {
+                    navReglas.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                    seccionReglas.classList.remove("hidden");
+                }
+            }
+
+            navPronostico.onclick = (e) => { e.preventDefault(); cambiarVista('pronostico'); };
+            navTabla.onclick = (e) => { e.preventDefault(); cambiarVista('tabla'); };
+            navReglas.onclick = (e) => { e.preventDefault(); cambiarVista('reglas'); };
+        }
+
+        function configurarAutenticacion(auth, db) {
+            const authBtn = document.getElementById("auth-btn");
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    authBtn.textContent = "Cerrar Sesión (" + user.displayName.split(' ')[0] + ")";
+                    authBtn.className = "bg-zinc-800 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-zinc-700 transition shadow cursor-pointer";
+                    authBtn.onclick = () => {
+                        signOut(auth).then(() => alert("Sesión cerrada con éxito"));
+                    };
+                    cargarPronostico(db, user.uid);
+                } else {
+                    authBtn.textContent = "Iniciar Sesión con Google";
+                    authBtn.className = "bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/30 cursor-pointer";
+                    authBtn.onclick = () => {
+                        signInWithPopup(auth, googleProvider)
+                        .then((result) => {
+                            alert("¡Bienvenido, " + result.user.displayName + "!");
+                        })
+                        .catch((error) => {
+                            alert("Error al iniciar sesión: " + error.message);
+                        });
+                    };
+                }
+            });
+        }
+
+        window.guardarPronosticoFirestore = async function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Debes iniciar sesión con Google para guardar tu pronóstico.");
+                return;
+            }
+
+            const poleEl = document.getElementById("pole-select");
+            const pole = poleEl ? poleEl.value : "";
+            
+            const top10 = [];
+            for (let i = 1; i <= 10; i++) {
+                let selectPuesto = document.getElementById(`puesto-${i}`);
+                top10.push(selectPuesto ? selectPuesto.value : "");
+            }
+
+            try {
+                await setDoc(doc(db, "pronosticos", user.uid), {
+                    nombreUsuario: user.displayName || "Anónimo",
+                    email: user.email || "",
+                    pole: pole,
+                    top10: top10,
+                    actualizado: new Date()
+                }, { merge: true });
+                
+                alert("¡Pronóstico guardado exitosamente en Firestore!");
+            } catch (e) {
+                console.error("Error al guardar:", e);
+                alert("Error al guardar el pronóstico: " + e.message);
+            }
+        }
+
+        async function cargarPronostico(db, uid) {
+            try {
+                const docSnap = await getDoc(doc(db, "pronosticos", uid));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.pole) document.getElementById("pole-select").value = data.pole;
+                    if (data.top10) {
+                        data.top10.forEach((piloto, index) => {
+                            let sel = document.getElementById(`puesto-${index + 1}`);
+                            if (sel) sel.value = piloto;
+                        });
+                        actualizarContadorCompletados();
+                    }
+                }
+            } catch (e) {
+                console.error("Error cargando pronóstico previo", e);
+            }
+        }
+
+        async function cargarTablaGeneral() {
+            const contenedor = document.getElementById("lista-tabla-general");
+            contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Cargando pronósticos de la comunidad...</p>";
+            try {
+                const querySnapshot = await getDocs(collection(db, "pronosticos"));
+                if (querySnapshot.empty) {
+                    contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Aún no hay pronósticos guardados por los participantes.</p>";
+                    return;
+                }
+                let html = '<div class="space-y-3">';
+                querySnapshot.forEach((docSnap) => {
+                    const p = docSnap.data();
+                    html += `
+                        <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                            <div>
+                                <h4 class="font-bold text-white text-base">${p.nombreUsuario || 'Participante'}</h4>
+                                <p class="text-xs text-zinc-400">Poleman: <span class="text-red-500 font-semibold">${p.pole || 'No definido'}</span></p>
+                            </div>
+                            <div class="text-xs text-zinc-300 bg-black px-3 py-1.5 rounded-lg border border-zinc-800">
+                                Top 10 registrado (${p.top10 ? p.top10.filter(Boolean).length : 0}/10 pilotos)
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                contenedor.innerHTML = html;
+            } catch (e) {
+                contenedor.innerHTML = "<p class='text-red-500 text-sm'>Error al cargar la tabla general: " + e.message + "</p>";
+            }
+        }
+
+        window.reiniciarFormulario = function() {
+            document.getElementById("pole-select").value = "";
+            for (let i = 1; i <= 10; i++) {
+                let sel = document.getElementById(`puesto-${i}`);
+                if (sel) sel.value = "";
+            }
+            actualizarContadorCompletados();
+        }
+    </script>
+</body>
+</html>
