@@ -59,7 +59,6 @@
             
             <div class="flex items-center space-x-4">
                 <div id="gp-icono-bandera" class="w-14 h-14 md:w-16 md:h-16 bg-black/60 flex items-center justify-center rounded-2xl border border-zinc-700/80 shadow-inner overflow-hidden shrink-0">
-                    <!-- Imagen personalizada integrada -->
                     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTD6zpAfdeWFnexo4z9Rbee0lKG8YUf146Aa_fZ2q0ZNOEy_AfrymYXFojghBVDxnMSGYCnN7yKmE06rHUFhNnf3sgFnczWVnZ9MIxqA&s=10" alt="Logo GP" class="w-full h-full object-cover">
                 </div>
                 <div class="space-y-1">
@@ -310,7 +309,7 @@
         </div>
     </div>
 
-    <!-- Lógica Local Simple (Sin Firebase Auth, ideal para GitHub Pages) -->
+    <!-- Script Principal -->
     <script>
         const ADMIN_USER = "daniel"; 
 
@@ -474,7 +473,14 @@
                 if (document.getElementById(`puesto-${i}`)?.value) completados++;
             }
             const el = document.getElementById("contador-completados");
-            if (el) el.textContent = `${completados} / 10 completados`;
+            if (el) {
+                el.textContent = `${completados} / 10 completados`;
+                if (completados === 10) {
+                    el.className = "text-[11px] font-bold bg-green-950 text-green-400 px-3 py-1.5 rounded-full border border-green-800";
+                } else {
+                    el.className = "text-[11px] font-bold bg-black text-zinc-300 px-3 py-1.5 rounded-full border border-zinc-800";
+                }
+            }
         }
 
         window.reiniciarTop10 = function() {
@@ -483,366 +489,6 @@
                 if (sel) sel.value = "";
             }
             actualizarContadorCompletados();
-        }
-
-        function verificarLimitesTiempo() {
-            const ahora = new Date();
-            const limitePole = new Date(CONFIG_FECHAS_GP.cierrePole.getTime() - 5 * 60000);
-            const limiteCarrera = new Date(CONFIG_FECHAS_GP.cierreCarrera.getTime() - 5 * 60000);
-
-            const badgePole = document.getElementById("estado-tanda-1");
-            const selectPole = document.getElementById("pole-select");
-            const btnPole = document.getElementById("btn-guardar-pole");
-
-            if (ahora >= limitePole) {
-                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-500 border-red-800"; badgePole.textContent = "Cerrado"; }
-                if (selectPole) selectPole.disabled = true;
-                if (btnPole) btnPole.disabled = true;
-            } else {
-                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-emerald-950 text-emerald-500 border-emerald-800"; badgePole.textContent = "Abierto"; }
-            }
-
-            const badgeTop10 = document.getElementById("estado-tanda-2");
-            const btnTop10 = document.getElementById("btn-guardar-top10");
-            if (ahora >= limiteCarrera) {
-                if (badgeTop10) { badgeTop10.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-500 border-red-800"; badgeTop10.textContent = "Cerrado"; }
-                for (let i = 1; i <= 10; i++) {
-                    let s = document.getElementById(`puesto-${i}`);
-                    if (s) s.disabled = true;
-                }
-                if (btnTop10) btnTop10.disabled = true;
-            } else {
-                if (badgeTop10) { badgeTop10.className = "text-xs font-bold px-3 py-1 rounded-full border bg-emerald-950 text-emerald-500 border-emerald-800"; badgeTop10.textContent = "Abierto"; }
-            }
-        }
-
-        window.abrirModalAuth = function() {
-            document.getElementById("modal-auth").classList.remove("hidden");
-        }
-        window.cerrarModalAuth = function() {
-            document.getElementById("modal-auth").classList.add("hidden");
-        }
-
-        window.realizarLoginOSignup = function() {
-            const user = document.getElementById("input-username").value.trim();
-            const pass = document.getElementById("input-password").value.trim();
-
-            if (!user || !pass) {
-                alert("Por favor ingresa un nombre de usuario y una contraseña.");
-                return;
-            }
-
-            usuarioActual = user;
-            localStorage.setItem("prode_usuario_actual", user);
-            
-            let usuariosDB = JSON.parse(localStorage.getItem("prode_usuarios_db") || "{}");
-            if (!usuariosDB[user]) {
-                usuariosDB[user] = pass;
-                localStorage.setItem("prode_usuarios_db", JSON.stringify(usuariosDB));
-            }
-
-            cerrarModalAuth();
-            actualizarEstadoSesionUI();
-            cargarPronosticosGuardados();
-            cargarListaParticipantesQueVotaron();
-            alert(`¡Bienvenido, ${user}! Sesión iniciada correctamente.`);
-        }
-
-        function actualizarEstadoSesionUI() {
-            const btnAuth = document.getElementById("auth-btn");
-            const tagUser = document.getElementById("usuario-conectado-tag");
-            const navAdmin = document.getElementById("nav-admin");
-            const navMAdmin = document.getElementById("nav-m-admin");
-
-            if (usuarioActual) {
-                btnAuth.textContent = "Cerrar Sesión";
-                btnAuth.onclick = cerrarSesion;
-                tagUser.textContent = `👤 ${usuarioActual}`;
-                tagUser.classList.remove("hidden");
-
-                if (usuarioActual.toLowerCase() === ADMIN_USER.toLowerCase()) {
-                    navAdmin?.classList.remove("hidden");
-                    navMAdmin?.classList.remove("hidden");
-                } else {
-                    navAdmin?.classList.add("hidden");
-                    navMAdmin?.classList.add("hidden");
-                }
-                cargarPronosticosGuardados();
-            } else {
-                btnAuth.textContent = "Iniciar Sesión";
-                btnAuth.onclick = abrirModalAuth;
-                tagUser.classList.add("hidden");
-                navAdmin?.classList.add("hidden");
-                navMAdmin?.classList.add("hidden");
-            }
-        }
-
-        function cerrarSesion() {
-            usuarioActual = null;
-            localStorage.removeItem("prode_usuario_actual");
-            actualizarEstadoSesionUI();
-            window.location.reload();
-        }
-
-        window.guardarPoleLocal = function() {
-            if (!usuarioActual) {
-                alert("Debes iniciar sesión con tu nombre de usuario para guardar.");
-                abrirModalAuth();
-                return;
-            }
-            const poleVal = document.getElementById("pole-select").value;
-            if (!poleVal) {
-                alert("Selecciona un piloto para la pole.");
-                return;
-            }
-
-            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
-            if (!pronosticos[ID_GP_ACTUAL]) pronosticos[ID_GP_ACTUAL] = {};
-            if (!pronosticos[ID_GP_ACTUAL][usuarioActual]) pronosticos[ID_GP_ACTUAL][usuarioActual] = {};
-
-            pronosticos[ID_GP_ACTUAL][usuarioActual].pole = poleVal;
-            localStorage.setItem("prode_pronosticos", JSON.stringify(pronosticos));
-            
-            alert("¡Pronóstico de Pole guardado con éxito!");
-            cargarListaParticipantesQueVotaron();
-        }
-
-        window.guardarTop10Local = function() {
-            if (!usuarioActual) {
-                alert("Debes iniciar sesión con tu nombre de usuario para guardar.");
-                abrirModalAuth();
-                return;
-            }
-
-            let top10Arr = [];
-            for (let i = 1; i <= 10; i++) {
-                let val = document.getElementById(`puesto-${i}`).value;
-                if (!val) {
-                    alert(`Debes completar los 10 puestos (falta el puesto ${i}).`);
-                    return;
-                }
-                top10Arr.push(val);
-            }
-
-            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
-            if (!pronosticos[ID_GP_ACTUAL]) pronosticos[ID_GP_ACTUAL] = {};
-            if (!pronosticos[ID_GP_ACTUAL][usuarioActual]) pronosticos[ID_GP_ACTUAL][usuarioActual] = {};
-
-            pronosticos[ID_GP_ACTUAL][usuarioActual].top10 = top10Arr;
-            localStorage.setItem("prode_pronosticos", JSON.stringify(pronosticos));
-
-            alert("¡Pronóstico de Top 10 guardado con éxito!");
-            cargarListaParticipantesQueVotaron();
-        }
-
-        function cargarPronosticosGuardados() {
-            if (!usuarioActual) return;
-            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
-            if (pronosticos[ID_GP_ACTUAL] && pronosticos[ID_GP_ACTUAL][usuarioActual]) {
-                const userPron = pronosticos[ID_GP_ACTUAL][usuarioActual];
-                if (userPron.pole) {
-                    const sel = document.getElementById("pole-select");
-                    if (sel) sel.value = userPron.pole;
-                }
-                if (userPron.top10 && Array.isArray(userPron.top10)) {
-                    userPron.top10.forEach((piloto, index) => {
-                        let sel = document.getElementById(`puesto-${index + 1}`);
-                        if (sel) sel.value = piloto;
-                    });
-                    actualizarContadorCompletados();
-                }
-            }
-        }
-
-        window.abrirModalMiPronostico = function() {
-            if (!usuarioActual) {
-                alert("Inicia sesión para ver tu pronóstico.");
-                abrirModalAuth();
-                return;
-            }
-            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
-            let userPron = pronosticos[ID_GP_ACTUAL]?.[usuarioActual];
-
-            let html = "";
-            if (!userPron || (!userPron.pole && !userPron.top10)) {
-                html = `<p class="text-xs text-zinc-400">No tienes pronósticos guardados para este Gran Premio.</p>`;
-            } else {
-                if (userPron.pole) {
-                    html += `<div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-1">
-                        <span class="text-[10px] uppercase font-bold text-red-500">Pole Position</span>
-                        <p class="text-xs font-bold text-white">${userPron.pole}</p>
-                    </div>`;
-                }
-                if (userPron.top10) {
-                    html += `<div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-2">
-                        <span class="text-[10px] uppercase font-bold text-red-500">Top 10 de Carrera</span>
-                        <ul class="space-y-1">`;
-                    userPron.top10.forEach((p, idx) => {
-                        html += `<li class="text-xs text-zinc-200 flex justify-between border-b border-zinc-800/50 pb-1">
-                            <span class="font-bold text-red-500">#${idx+1}</span>
-                            <span class="truncate ml-2">${p}</span>
-                        </li>`;
-                    });
-                    html += `</ul></div>`;
-                }
-            }
-            document.getElementById("contenido-mi-pronostico").innerHTML = html;
-            document.getElementById("modal-mi-pronostico").classList.remove("hidden");
-        }
-
-        window.cerrarModalMiPronostico = function() {
-            document.getElementById("modal-mi-pronostico").classList.add("hidden");
-        }
-
-        function cargarListaParticipantesQueVotaron() {
-            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
-            let gpVotos = pronosticos[ID_GP_ACTUAL] || {};
-            let usuariosQueVotaron = Object.keys(gpVotos);
-
-            const contadorEl = document.getElementById("contador-participantes-votos");
-            const avatarsEl = document.getElementById("lista-avatars-votos");
-
-            if (contadorEl) contadorEl.textContent = `${usuariosQueVotaron.length} participantes han registrado sus votos.`;
-            if (avatarsEl) {
-                avatarsEl.innerHTML = "";
-                if (usuariosQueVotaron.length === 0) {
-                    avatarsEl.innerHTML = `<span class="text-[11px] text-zinc-500 italic">Nadie ha votado todavía. ¡Sé el primero!</span>`;
-                } else {
-                    usuariosQueVotaron.forEach(u => {
-                        let badge = document.createElement("span");
-                        badge.className = "bg-zinc-900 text-zinc-300 border border-zinc-700 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase";
-                        badge.textContent = u;
-                        avatarsEl.appendChild(badge);
-                    });
-                }
-            }
-        }
-
-        window.ejecutarCalculoAutomaticoPuntos = function() {
-            if (!usuarioActual || usuarioActual.toLowerCase() !== ADMIN_USER.toLowerCase()) {
-                alert("No tienes permisos de administrador.");
-                return;
-            }
-
-            let poleReal = document.getElementById("admin-pole-real").value;
-            let top10Real = [];
-            for (let i = 1; i <= 10; i++) {
-                let val = document.getElementById(`admin-puesto-${i}`).value;
-                if (!val) {
-                    alert(`Falta definir el puesto real ${i} en el panel de admin.`);
-                    return;
-                }
-                top10Real.push(val);
-            }
-
-            let resultadosReales = JSON.parse(localStorage.getItem("prode_resultados_reales") || "{}");
-            resultadosReales[ID_GP_ACTUAL] = { pole: poleReal, top10: top10Real };
-            localStorage.setItem("prode_resultados_reales", JSON.stringify(resultadosReales));
-
-            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
-            let gpVotos = pronosticos[ID_GP_ACTUAL] || {};
-            let puntuacionesFecha = {};
-
-            for (let user in gpVotos) {
-                let pts = 0;
-                let pron = gpVotos[user];
-
-                if (pron.pole && pron.pole === poleReal) {
-                    pts += 25;
-                }
-
-                if (pron.top10 && Array.isArray(pron.top10)) {
-                    let aciertosPodioExacto = 0;
-                    let aciertosTop5Exacto = true;
-
-                    pron.top10.forEach((pilotoPron, idx) => {
-                        let puestoPron = idx + 1;
-                        let puestoRealEncontrado = top10Real.indexOf(pilotoPron);
-
-                        if (puestoRealEncontrado !== -1) {
-                            let puestoReal = puestoRealEncontrado + 1;
-                            let diferencia = Math.abs(puestoPron - puestoReal);
-
-                            if (diferencia === 0) {
-                                pts += 25;
-                                if (puestoPron <= 3) aciertosPodioExacto++;
-                            } else if (diferencia === 1) {
-                                pts += 15;
-                                aciertosTop5Exacto = false;
-                            } else if (diferencia === 2) {
-                                pts += 10;
-                                aciertosTop5Exacto = false;
-                            } else if (diferencia <= 4) {
-                                pts += 5;
-                                aciertosTop5Exacto = false;
-                            }
-                        } else {
-                            aciertosTop5Exacto = false;
-                        }
-                    });
-
-                    if (aciertosPodioExacto === 3) pts += 25;
-                    if (aciertosTop5Exacto && pron.top10.length >= 5) pts += 50;
-                }
-
-                puntuacionesFecha[user] = pts;
-            }
-
-            let puntosFechasDB = JSON.parse(localStorage.getItem("prode_puntos_fechas") || "{}");
-            puntosFechasDB[ID_GP_ACTUAL] = puntuacionesFecha;
-            localStorage.setItem("prode_puntos_fechas", JSON.stringify(puntosFechasDB));
-
-            actualizarTablaGeneralAcumulada();
-
-            alert("¡Resultados guardados y puntos calculados con éxito!");
-            cargarTablas();
-        }
-
-        function actualizarTablaGeneralAcumulada() {
-            let puntosFechasDB = JSON.parse(localStorage.getItem("prode_puntos_fechas") || "{}");
-            let general = {};
-
-            for (let gpId in puntosFechasDB) {
-                let fechaUsers = puntosFechasDB[gpId];
-                for (let user in fechaUsers) {
-                    if (!general[user]) general[user] = 0;
-                    general[user] += fechaUsers[user];
-                }
-            }
-            localStorage.setItem("prode_tabla_general", JSON.stringify(general));
-        }
-
-        function cargarTablas() {
-            let puntosFechasDB = JSON.parse(localStorage.getItem("prode_puntos_fechas") || "{}");
-            let fechaUsers = puntosFechasDB[ID_GP_ACTUAL] || {};
-            let listaFechaHTML = document.getElementById("lista-tabla-fecha");
-
-            let arrayFecha = Object.entries(fechaUsers).sort((a, b) => b[1] - a[1]);
-            if (arrayFecha.length === 0) {
-                listaFechaHTML.innerHTML = `<p class="text-xs text-zinc-400 italic p-2">Aún no hay puntuaciones calculadas para esta fecha.</p>`;
-            } else {
-                let html = `<table class="w-full text-left text-xs"><thead class="border-b border-zinc-800 text-zinc-400"><tr><th class="p-2">Pos</th><th class="p-2">Participante</th><th class="p-2 text-right">Puntos Fecha</th></tr></thead><tbody>`;
-                arrayFecha.forEach(([user, pts], index) => {
-                    html += `<tr class="border-b border-zinc-900"><td class="p-2 font-bold text-red-500">#${index+1}</td><td class="p-2 font-bold text-white">${user}</td><td class="p-2 text-right font-black text-red-500">${pts} pts</td></tr>`;
-                });
-                html += `</tbody></table>`;
-                listaFechaHTML.innerHTML = html;
-            }
-
-            let generalDB = JSON.parse(localStorage.getItem("prode_tabla_general") || "{}");
-            let listaGeneralHTML = document.getElementById("lista-tabla-general");
-            let arrayGeneral = Object.entries(generalDB).sort((a, b) => b[1] - a[1]);
-
-            if (arrayGeneral.length === 0) {
-                listaGeneralHTML.innerHTML = `<p class="text-xs text-zinc-400 italic p-2">Aún no hay puntos acumulados en la temporada.</p>`;
-            } else {
-                let html = `<table class="w-full text-left text-xs"><thead class="border-b border-zinc-800 text-zinc-400"><tr><th class="p-2">Pos</th><th class="p-2">Participante</th><th class="p-2 text-right">Puntos Totales</th></tr></thead><tbody>`;
-                arrayGeneral.forEach(([user, pts], index) => {
-                    html += `<tr class="border-b border-zinc-900"><td class="p-2 font-bold text-red-500">#${index+1}</td><td class="p-2 font-bold text-white">${user}</td><td class="p-2 text-right font-black text-red-500">${pts} pts</td></tr>`;
-                });
-                html += `</tbody></table>`;
-                listaGeneralHTML.innerHTML = html;
-            }
         }
 
         function configurarNavegacion() {
@@ -862,9 +508,9 @@
                 seccionReglas?.classList.add("hidden");
                 seccionAdmin?.classList.add("hidden");
 
-                [navPronostico, navTabla, navReglas, navAdmin].forEach(el => {
-                    if (el) {
-                        el.className = "text-zinc-400 hover:text-white transition pb-1 font-semibold";
+                [navPronostico, navTabla, navReglas, navAdmin].forEach(n => {
+                    if (n) {
+                        n.className = "text-zinc-400 hover:text-white transition pb-1 font-semibold text-xs";
                     }
                 });
             }
@@ -872,30 +518,30 @@
             navPronostico?.addEventListener("click", (e) => {
                 e.preventDefault();
                 ocultarTodo();
-                seccionPronostico.classList.remove("hidden");
-                navPronostico.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                seccionPronostico?.classList.remove("hidden");
+                navPronostico.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold text-xs";
             });
 
             navTabla?.addEventListener("click", (e) => {
                 e.preventDefault();
                 ocultarTodo();
-                seccionTabla.classList.remove("hidden");
-                navTabla.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                seccionTabla?.classList.remove("hidden");
+                navTabla.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold text-xs";
                 cargarTablas();
             });
 
             navReglas?.addEventListener("click", (e) => {
                 e.preventDefault();
                 ocultarTodo();
-                seccionReglas.classList.remove("hidden");
-                navReglas.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                seccionReglas?.classList.remove("hidden");
+                navReglas.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold text-xs";
             });
 
             navAdmin?.addEventListener("click", (e) => {
                 e.preventDefault();
                 ocultarTodo();
-                seccionAdmin.classList.remove("hidden");
-                navAdmin.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                seccionAdmin?.classList.remove("hidden");
+                navAdmin.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold text-xs";
             });
         }
 
@@ -906,24 +552,268 @@
             document.getElementById("seccion-admin")?.classList.add("hidden");
 
             ['pronostico', 'tabla', 'reglas', 'admin'].forEach(s => {
-                let btn = document.getElementById(`nav-m-${s}`);
+                const btn = document.getElementById(`nav-m-${s}`);
                 if (btn) btn.className = "flex flex-col items-center text-zinc-400 hover:text-white space-y-0.5 cursor-pointer flex-1";
             });
 
             document.getElementById(`seccion-${seccion}`)?.classList.remove("hidden");
-            let activeBtn = document.getElementById(`nav-m-${seccion}`);
-            if (activeBtn) activeBtn.className = "flex flex-col items-center text-red-500 space-y-0.5 cursor-pointer flex-1";
-            
+            const btnActivo = document.getElementById(`nav-m-${seccion}`);
+            if (btnActivo) btnActivo.className = "flex flex-col items-center text-red-500 space-y-0.5 cursor-pointer flex-1";
+
             if (seccion === 'tabla') cargarTablas();
         }
 
-        window.cambiarVistaTabla = function(vista) {
+        function verificarLimitesTiempo() {
+            const ahora = new Date();
+            const estadoPole = document.getElementById("estado-tanda-1");
+            const estadoCarrera = document.getElementById("estado-tanda-2");
+            const btnGuardarPole = document.getElementById("btn-guardar-pole");
+            const btnGuardarTop10 = document.getElementById("btn-guardar-top10");
+
+            if (ahora > CONFIG_FECHAS_GP.cierrePole) {
+                if (estadoPole) {
+                    estadoPole.textContent = "🔒 Tanda Cerrada";
+                    estadoPole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-zinc-900 text-zinc-500 border-zinc-800";
+                }
+                if (btnGuardarPole) {
+                    btnGuardarPole.disabled = true;
+                    btnGuardarPole.className = "w-full md:w-auto bg-zinc-800 text-zinc-500 font-black px-6 py-3 rounded-xl text-xs uppercase cursor-not-allowed";
+                }
+            } else {
+                if (estadoPole) {
+                    estadoPole.textContent = "🟢 Abierto para Votar";
+                    estadoPole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800";
+                }
+            }
+
+            if (ahora > CONFIG_FECHAS_GP.cierreCarrera) {
+                if (estadoCarrera) {
+                    estadoCarrera.textContent = "🔒 Tanda Cerrada";
+                    estadoCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-zinc-900 text-zinc-500 border-zinc-800";
+                }
+                if (btnGuardarTop10) {
+                    btnGuardarTop10.disabled = true;
+                    btnGuardarTop10.className = "w-full md:w-auto bg-zinc-800 text-zinc-500 font-black px-6 py-3 rounded-xl text-xs uppercase cursor-not-allowed";
+                }
+            } else {
+                if (estadoCarrera) {
+                    estadoCarrera.textContent = "🟢 Abierto para Votar";
+                    estadoCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800";
+                }
+            }
+        }
+
+        window.abrirModalAuth = function() {
+            document.getElementById("modal-auth")?.classList.remove("hidden");
+        }
+        window.cerrarModalAuth = function() {
+            document.getElementById("modal-auth")?.classList.add("hidden");
+        }
+
+        window.realizarLoginOSignup = function() {
+            const user = document.getElementById("input-username").value.trim().toLowerCase();
+            const pass = document.getElementById("input-password").value.trim();
+
+            if (!user || !pass) {
+                alert("Por favor ingresa un nombre de usuario y contraseña.");
+                return;
+            }
+
+            usuarioActual = user;
+            localStorage.setItem("prode_usuario_actual", user);
+            cerrarModalAuth();
+            actualizarEstadoSesionUI();
+            cargarListaParticipantesQueVotaron();
+            alert(`¡Sesión iniciada correctamente como: ${user}!`);
+        }
+
+        function actualizarEstadoSesionUI() {
+            const authBtn = document.getElementById("auth-btn");
+            const usuarioTag = document.getElementById("usuario-conectado-tag");
+            const navAdmin = document.getElementById("nav-admin");
+            const navMAdmin = document.getElementById("nav-m-admin");
+
+            if (usuarioActual) {
+                if (authBtn) {
+                    authBtn.textContent = "Cerrar Sesión";
+                    authBtn.onclick = () => {
+                        localStorage.removeItem("prode_usuario_actual");
+                        usuarioActual = null;
+                        actualizarEstadoSesionUI();
+                        cargarListaParticipantesQueVotaron();
+                        alert("Sesión cerrada.");
+                    };
+                }
+                if (usuarioTag) {
+                    usuarioTag.textContent = `👤 ${usuarioActual}`;
+                    usuarioTag.classList.remove("hidden");
+                }
+
+                if (usuarioActual === ADMIN_USER) {
+                    navAdmin?.classList.remove("hidden");
+                    navMAdmin?.classList.remove("hidden");
+                } else {
+                    navAdmin?.classList.add("hidden");
+                    navMAdmin?.classList.add("hidden");
+                }
+            } else {
+                if (authBtn) {
+                    authBtn.textContent = "Iniciar Sesión";
+                    authBtn.onclick = abrirModalAuth;
+                }
+                if (usuarioTag) {
+                    usuarioTag.classList.add("hidden");
+                }
+                navAdmin?.classList.add("hidden");
+                navMAdmin?.classList.add("hidden");
+            }
+        }
+
+        window.guardarPoleLocal = function() {
+            if (!usuarioActual) {
+                alert("Debes iniciar sesión para guardar tu pronóstico.");
+                abrirModalAuth();
+                return;
+            }
+            if (new Date() > CONFIG_FECHAS_GP.cierrePole) {
+                alert("El tiempo para votar la Pole ha finalizado.");
+                return;
+            }
+
+            const poleVal = document.getElementById("pole-select").value;
+            if (!poleVal) {
+                alert("Selecciona un piloto para la Pole.");
+                return;
+            }
+
+            let key = `prode_${ID_GP_ACTUAL}_${usuarioActual}_pole`;
+            localStorage.setItem(key, poleVal);
+            registrarUsuarioQueVoto(usuarioActual);
+            alert("¡Pronóstico de Pole guardado con éxito!");
+        }
+
+        window.guardarTop10Local = function() {
+            if (!usuarioActual) {
+                alert("Debes iniciar sesión para guardar tu pronóstico.");
+                abrirModalAuth();
+                return;
+            }
+            if (new Date() > CONFIG_FECHAS_GP.cierreCarrera) {
+                alert("El tiempo para votar el Top 10 ha finalizado.");
+                return;
+            }
+
+            let top10 = {};
+            let completados = 0;
+            for (let i = 1; i <= 10; i++) {
+                let val = document.getElementById(`puesto-${i}`).value;
+                if (val) {
+                    top10[i] = val;
+                    completados++;
+                }
+            }
+
+            if (completados < 10) {
+                alert("Debes completar los 10 puestos para guardar tu Top 10.");
+                return;
+            }
+
+            let key = `prode_${ID_GP_ACTUAL}_${usuarioActual}_top10`;
+            localStorage.setItem(key, JSON.stringify(top10));
+            registrarUsuarioQueVoto(usuarioActual);
+            alert("¡Pronóstico de Top 10 guardado con éxito!");
+        }
+
+        function registrarUsuarioQueVoto(user) {
+            let keyList = `prode_${ID_GP_ACTUAL}_participantes`;
+            let lista = JSON.parse(localStorage.getItem(keyList) || "[]");
+            if (!lista.includes(user)) {
+                lista.push(user);
+                localStorage.setItem(keyList, JSON.stringify(lista));
+            }
+            cargarListaParticipantesQueVotaron();
+        }
+
+        function cargarListaParticipantesQueVotaron() {
+            let keyList = `prode_${ID_GP_ACTUAL}_participantes`;
+            let lista = JSON.parse(localStorage.getItem(keyList) || "[]");
+            const contadorEl = document.getElementById("contador-participantes-votos");
+            const avatarsEl = document.getElementById("lista-avatars-votos");
+
+            if (contadorEl) {
+                contadorEl.textContent = `${lista.length} participante(s) han registrado pronósticos en esta fecha.`;
+            }
+            if (avatarsEl) {
+                avatarsEl.innerHTML = "";
+                if (lista.length === 0) {
+                    avatarsEl.innerHTML = '<span class="text-xs text-zinc-500 italic">Ningún usuario ha votado todavía.</span>';
+                } else {
+                    lista.forEach(u => {
+                        let span = document.createElement("span");
+                        span.className = "bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center space-x-1";
+                        span.innerHTML = `<span>🟢</span><span>${u}</span>`;
+                        avatarsEl.appendChild(span);
+                    });
+                }
+            }
+        }
+
+        window.abrirModalMiPronostico = function() {
+            if (!usuarioActual) {
+                alert("Inicia sesión para ver tu pronóstico guardado.");
+                abrirModalAuth();
+                return;
+            }
+
+            const contenedor = document.getElementById("contenido-mi-pronostico");
+            if (!contenedor) return;
+
+            let poleKey = `prode_${ID_GP_ACTUAL}_${usuarioActual}_pole`;
+            let top10Key = `prode_${ID_GP_ACTUAL}_${usuarioActual}_top10`;
+
+            let poleGuardado = localStorage.getItem(poleKey) || "No registrado";
+            let top10Guardado = JSON.parse(localStorage.getItem(top10Key) || "{}");
+
+            let top10Html = "";
+            if (Object.keys(top10Guardado).length === 0) {
+                top10Html = '<p class="text-xs text-zinc-500 italic">No has guardado Top 10 para esta fecha.</p>';
+            } else {
+                top10Html = '<div class="space-y-1.5">';
+                for (let i = 1; i <= 10; i++) {
+                    top10Html += `<div class="flex items-center justify-between bg-zinc-900 p-2 rounded-lg border border-zinc-800 text-xs">
+                        <span class="font-bold text-red-500">Puesto ${i}</span>
+                        <span class="text-zinc-200">${top10Guardado[i] || '---'}</span>
+                    </div>`;
+                }
+                top10Html += '</div>';
+            }
+
+            contenedor.innerHTML = `
+                <div class="space-y-3">
+                    <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                        <span class="block text-[10px] uppercase font-bold text-zinc-400">Poleman Pronosticado</span>
+                        <span class="text-xs font-bold text-white">${poleGuardado}</span>
+                    </div>
+                    <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-2">
+                        <span class="block text-[10px] uppercase font-bold text-zinc-400">Top 10 Pronosticado</span>
+                        ${top10Html}
+                    </div>
+                </div>
+            `;
+            document.getElementById("modal-mi-pronostico")?.classList.remove("hidden");
+        }
+
+        window.cerrarModalMiPronostico = function() {
+            document.getElementById("modal-mi-pronostico")?.classList.add("hidden");
+        }
+
+        window.cambiarVistaTabla = function(tipo) {
             const btnFecha = document.getElementById("btn-tab-fecha");
             const btnGeneral = document.getElementById("btn-tab-general");
             const contFecha = document.getElementById("contenedor-tabla-fecha");
             const contGeneral = document.getElementById("contenedor-tabla-general");
 
-            if (vista === 'fecha') {
+            if (tipo === 'fecha') {
                 btnFecha.className = "bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer shrink-0";
                 btnGeneral.className = "bg-zinc-900 text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border border-zinc-800 shrink-0";
                 contFecha.classList.remove("hidden");
@@ -933,6 +823,173 @@
                 btnFecha.className = "bg-zinc-900 text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border border-zinc-800 shrink-0";
                 contGeneral.classList.remove("hidden");
                 contFecha.classList.add("hidden");
+            }
+        }
+
+        window.ejecutarCalculoAutomaticoPuntos = function() {
+            if (usuarioActual !== ADMIN_USER) {
+                alert("Acceso denegado. Solo el administrador puede calcular puntos.");
+                return;
+            }
+
+            const poleReal = document.getElementById("admin-pole-real").value;
+            let top10Real = {};
+            let incompletos = false;
+
+            for (let i = 1; i <= 10; i++) {
+                let val = document.getElementById(`admin-puesto-${i}`).value;
+                if (!val) incompletos = true;
+                top10Real[i] = val;
+            }
+
+            if (!poleReal || incompletos) {
+                alert("Debes seleccionar el Poleman real y los 10 puestos oficiales completos.");
+                return;
+            }
+
+            let keyList = `prode_${ID_GP_ACTUAL}_participantes`;
+            let listaParticipantes = JSON.parse(localStorage.getItem(keyList) || "[]");
+            let resultadosFecha = {};
+
+            listaParticipantes.forEach(user => {
+                let pts = 0;
+                let poleUser = localStorage.getItem(`prode_${ID_GP_ACTUAL}_${user}_pole`);
+                let top10User = JSON.parse(localStorage.getItem(`prode_${ID_GP_ACTUAL}_${user}_top10`) || "{}");
+
+                // Cálculo Pole (+25 pts)
+                if (poleUser && poleUser === poleReal) {
+                    pts += 25;
+                }
+
+                // Cálculo Top 10 y Matriz de diferencias
+                let exactPodiumCount = 0;
+                let exactTop5Count = true;
+
+                for (let i = 1; i <= 10; i++) {
+                    let pUser = top10User[i];
+                    let pReal = top10Real[i];
+
+                    if (pUser && pReal) {
+                        if (pUser === pReal) {
+                            pts += 25; // Acierto exacto
+                            if (i <= 3) exactPodiumCount++;
+                        } else {
+                            // Buscar a qué distancia real quedó
+                            let posRealIndex = -1;
+                            for (let r = 1; r <= 10; r++) {
+                                if (top10Real[r] === pUser) {
+                                    posRealIndex = r;
+                                    break;
+                                }
+                            }
+                            if (posRealIndex !== -1) {
+                                let diff = Math.abs(i - posRealIndex);
+                                if (diff === 1) pts += 15;
+                                else if (diff === 2) pts += 10;
+                                else if (diff === 3) pts += 5;
+                            }
+                            if (i <= 5) exactTop5Count = false;
+                        }
+                    } else {
+                        if (i <= 5) exactTop5Count = false;
+                    }
+                }
+
+                // Bonos especiales
+                if (exactPodiumCount === 3) pts += 25;
+                if (exactTop5Count) pts += 50;
+
+                resultadosFecha[user] = pts;
+
+                // Acumular en tabla general
+                let genKey = `prode_general_${user}`;
+                let ptsAcumuladosPrevios = parseInt(localStorage.getItem(genKey) || "0");
+                // Para evitar duplicar si se recalcula varias veces, guardamos el puntaje de la fecha de forma independiente
+                let fechaPuntajeKey = `prode_pts_${ID_GP_ACTUAL}_${user}`;
+                let puntosAnterioresFecha = parseInt(localStorage.getItem(fechaPuntajeKey) || "0");
+                
+                let nuevosAcumulados = ptsAcumuladosPrevios - puntosAnterioresFecha + pts;
+                localStorage.setItem(genKey, nuevosAcumulados);
+                localStorage.setItem(fechaPuntajeKey, pts);
+            });
+
+            localStorage.setItem(`prode_resultados_fecha_${ID_GP_ACTUAL}`, JSON.stringify(resultadosFecha));
+            alert("¡Resultados reales guardados y puntuaciones calculadas con éxito!");
+            cargarTablas();
+        }
+
+        window.cargarTablas = function() {
+            // Cargar Tabla de la Fecha
+            const listaFechaEl = document.getElementById("lista-tabla-fecha");
+            let resultadosFecha = JSON.parse(localStorage.getItem(`prode_resultados_fecha_${ID_GP_ACTUAL}`) || "{}");
+            
+            let arrayFecha = Object.keys(resultadosFecha).map(u => ({ usuario: u, puntos: resultadosFecha[u] }));
+            arrayFecha.sort((a, b) => b.puntos - a.puntos);
+
+            if (arrayFecha.length === 0) {
+                listaFechaEl.innerHTML = '<p class="text-xs text-zinc-500 italic py-4 text-center">No hay resultados calculados aún para esta fecha.</p>';
+            } else {
+                let html = `<table class="w-full text-left text-xs">
+                    <thead class="bg-zinc-900 text-zinc-400 uppercase text-[10px] border-b border-zinc-800">
+                        <tr>
+                            <th class="p-3">Pos</th>
+                            <th class="p-3">Participante</th>
+                            <th class="p-3 text-right">Puntos Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800/60">`;
+                arrayFecha.forEach((item, index) => {
+                    html += `<tr class="hover:bg-zinc-900/40">
+                        <td class="p-3 font-black text-red-500">#${index + 1}</td>
+                        <td class="p-3 font-bold text-white">${item.usuario}</td>
+                        <td class="p-3 text-right font-black text-green-400">${item.puntos} pts</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+                listaFechaEl.innerHTML = html;
+            }
+
+            // Cargar Tabla General
+            const listaGeneralEl = document.getElementById("lista-tabla-general");
+            let keyList = `prode_${ID_GP_ACTUAL}_participantes`;
+            // Recopilar todos los usuarios con puntaje general en localStorage
+            let todosUsuarios = new Set(JSON.parse(localStorage.getItem(keyList) || "[]"));
+            // Buscar en todo el localStorage si hay más usuarios con puntaje general
+            for (let i = 0; i < localStorage.length; i++) {
+                let k = localStorage.key(i);
+                if (k.startsWith("prode_general_")) {
+                    todosUsuarios.add(k.replace("prode_general_", ""));
+                }
+            }
+
+            let arrayGeneral = [];
+            todosUsuarios.forEach(u => {
+                let ptsGen = parseInt(localStorage.getItem(`prode_general_${u}`) || "0");
+                arrayGeneral.push({ usuario: u, puntos: ptsGen });
+            });
+            arrayGeneral.sort((a, b) => b.puntos - a.puntos);
+
+            if (arrayGeneral.length === 0) {
+                listaGeneralEl.innerHTML = '<p class="text-xs text-zinc-500 italic py-4 text-center">No hay puntajes generales registrados aún.</p>';
+            } else {
+                let htmlGen = `<table class="w-full text-left text-xs">
+                    <thead class="bg-zinc-900 text-zinc-400 uppercase text-[10px] border-b border-zinc-800">
+                        <tr>
+                            <th class="p-3">Pos</th>
+                            <th class="p-3">Participante</th>
+                            <th class="p-3 text-right">Puntos Totales</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800/60">`;
+                arrayGeneral.forEach((item, index) => {
+                    htmlGen += `<tr class="hover:bg-zinc-900/40">
+                        <td class="p-3 font-black text-red-500">#${index + 1}</td>
+                        <td class="p-3 font-bold text-white">${item.usuario}</td>
+                        <td class="p-3 text-right font-black text-red-500">${item.puntos} pts</td>
+                    </tr>`;
+                });
+                htmlGen += `</tbody></table>`;
+                listaGeneralEl.innerHTML = htmlGen;
             }
         }
     </script>
