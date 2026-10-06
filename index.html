@@ -40,6 +40,13 @@
                     <h2 class="text-2xl md:text-3xl font-black mt-2 tracking-tight uppercase">Panel de Pronósticos por Tanda</h2>
                     <p class="text-zinc-400 text-xs mt-1">Vota la Pole (Sábado) y el Top 10 (Domingo). Puedes modificar tus elecciones hasta 5 min antes de cada sesión.</p>
                 </div>
+                <!-- BOTÓN PARA VER MI APUESTA GUARDADA -->
+                <div>
+                    <button onclick="abrirModalMiPronostico()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg transition cursor-pointer flex items-center space-x-2">
+                        <span>👁️</span>
+                        <span>Ver mi Pronóstico Guardado</span>
+                    </button>
+                </div>
             </div>
 
             <!-- TANDA 1: POLE POSITION -->
@@ -81,24 +88,18 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <!-- PARRILLA DE PILOTOS PARA ARRASTRAR/CLIC -->
                     <div class="lg:col-span-5 space-y-3">
                         <h4 class="font-black text-xs uppercase tracking-wider text-zinc-400">🏎️ Parrilla 2026 (Clic para asignar)</h4>
                         <input type="text" id="buscar-piloto" placeholder="Buscar piloto..." class="w-full bg-black text-white text-xs border border-zinc-700 rounded-xl px-3 py-2 focus:outline-none focus:border-red-600 transition">
-                        <div id="parrilla-container" class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
-                            <!-- Generado por JS -->
-                        </div>
+                        <div id="parrilla-container" class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1"></div>
                     </div>
 
-                    <!-- SELECCIONADOR TOP 10 -->
                     <div class="lg:col-span-7 space-y-3">
                         <div class="flex justify-between items-center">
                             <h4 class="font-black text-xs uppercase tracking-wider text-zinc-400">Tus puestos pronosticados</h4>
                             <button onclick="reiniciarTop10()" class="text-[11px] text-zinc-400 hover:text-white underline cursor-pointer">Limpiar Top 10</button>
                         </div>
-                        <div id="top-10-container" class="space-y-2 max-h-64 overflow-y-auto pr-1">
-                            <!-- Generado por JS -->
-                        </div>
+                        <div id="top-10-container" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
                         <div class="flex justify-end pt-2">
                             <button id="btn-guardar-top10" onclick="guardarTop10Firestore()" class="bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
                                 Guardar Pronóstico de Top 10
@@ -156,7 +157,6 @@
                     <span class="bg-red-950 text-red-500 text-[10px] px-3 py-1 rounded-full border border-red-800/60 font-black uppercase tracking-widest">Panel de Control</span>
                     <h2 class="text-xl font-black uppercase tracking-wider mt-2">Cargar Resultados Reales del GP</h2>
                 </div>
-
                 <div class="space-y-4">
                     <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-2">
                         <label class="block text-xs font-bold uppercase text-red-500">Poleman Oficial (Sábado)</label>
@@ -164,12 +164,10 @@
                             <option value="">-- Selecciona el Poleman Real --</option>
                         </select>
                     </div>
-
                     <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-3">
                         <label class="block text-xs font-bold uppercase text-red-500">Top 10 Oficial de Carrera (Domingo)</label>
                         <div id="admin-top10-container" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
                     </div>
-
                     <div class="flex justify-end pt-2">
                         <button onclick="ejecutarCalculoAutomaticoPuntos()" class="bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
                             ⚡ Guardar Resultados y Calcular Puntos Automáticamente
@@ -179,6 +177,24 @@
             </div>
         </div>
     </main>
+
+    <!-- MODAL PARA VER MI PRONÓSTICO GUARDADO -->
+    <div id="modal-mi-pronostico" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-950 border border-zinc-800 w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-5 relative">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="font-black text-sm uppercase tracking-wider text-red-500">📋 Tu Pronóstico Registrado</h3>
+                <button onclick="cerrarModalMiPronostico()" class="text-zinc-400 hover:text-white font-bold text-base cursor-pointer">✕</button>
+            </div>
+            <div id="contenido-mi-pronostico" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                <!-- Se llena dinámicamente con JS -->
+            </div>
+            <div class="flex justify-end pt-2 border-t border-zinc-800">
+                <button onclick="cerrarModalMiPronostico()" class="bg-zinc-900 hover:bg-zinc-800 text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer border border-zinc-700">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Firebase SDKs y Lógica Global -->
     <script type="module">
@@ -203,11 +219,9 @@
         const googleProvider = new GoogleAuthProvider();
         const ADMIN_EMAIL = "eliperez235@gmail.com";
 
-        // CONFIGURACIÓN DE FECHAS DE CIERRE (Modifica aquí los horarios de cada GP)
-        // Formato: "YYYY-MM-DDTHH:MM:SS" (Hora local o UTC según prefieras)
         const CONFIG_FECHAS_GP = {
-            cierrePole: new Date("2026-10-10T14:00:00"),  // Ejemplo: Sábado 14:00 (cierra 5 min antes de clasu)
-            cierreCarrera: new Date("2026-10-11T13:00:00") // Ejemplo: Domingo 13:00 (cierra 5 min antes de carrera)
+            cierrePole: new Date("2026-10-10T14:00:00"),
+            cierreCarrera: new Date("2026-10-11T13:00:00")
         };
 
         const pilotos2026 = [
@@ -333,8 +347,6 @@
 
         function verificarLimitesTiempo() {
             const ahora = new Date();
-            
-            // Margen de 5 minutos antes
             const limitePole = new Date(CONFIG_FECHAS_GP.cierrePole.getTime() - 5 * 60000);
             const limiteCarrera = new Date(CONFIG_FECHAS_GP.cierreCarrera.getTime() - 5 * 60000);
 
@@ -356,4 +368,239 @@
                 if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgeCarrera.textContent = "🔒 Cerrado (Tiempo Límite)"; }
                 if (btnTop10) btnTop10.disabled = true;
             } else {
-                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgeCarrera.textContent = "🟢 Abierto para Votar / Modificar
+                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgeCarrera.textContent = "🟢 Abierto para Votar / Modificar"; }
+            }
+        }
+
+        function configurarNavegacion() {
+            const navs = ['pronostico', 'tabla', 'reglas', 'admin'];
+            navs.forEach(n => {
+                document.getElementById(`nav-${n}`)?.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    navs.forEach(other => {
+                        document.getElementById(`nav-${other}`)?.classList.remove("text-red-500", "border-b-2", "border-red-600", "font-bold");
+                        document.getElementById(`nav-${other}`)?.classList.add("text-zinc-400");
+                        document.getElementById(`seccion-${other}`)?.classList.add("hidden");
+                    });
+                    document.getElementById(`nav-${n}`).classList.add("text-red-500", "border-b-2", "border-red-600", "font-bold");
+                    document.getElementById(`nav-${n}`).classList.remove("text-zinc-400");
+                    document.getElementById(`seccion-${n}`)?.classList.remove("hidden");
+                    if (n === 'tabla') cargarTablaGeneral();
+                });
+            });
+        }
+
+        function configurarAutenticacion(auth, db) {
+            const authBtn = document.getElementById("auth-btn");
+            const navAdmin = document.getElementById("nav-admin");
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    authBtn.textContent = "Cerrar Sesión (" + user.displayName.split(' ')[0] + ")";
+                    authBtn.onclick = () => signOut(auth).then(() => alert("Sesión cerrada"));
+                    if (user.email === ADMIN_EMAIL && navAdmin) navAdmin.classList.remove("hidden");
+                    cargarPronosticosUsuario(db, user.uid);
+                } else {
+                    authBtn.textContent = "Iniciar Sesión con Google";
+                    authBtn.onclick = () => signInWithPopup(auth, googleProvider).catch(err => alert(err.message));
+                    if (navAdmin) navAdmin.classList.add("hidden");
+                }
+            });
+        }
+
+        window.guardarPoleFirestore = async function() {
+            const user = auth.currentUser;
+            if (!user) { alert("Inicia sesión primero."); return; }
+            const pole = document.getElementById("pole-select").value;
+            if (!pole) { alert("Selecciona un piloto para la pole."); return; }
+
+            try {
+                await setDoc(doc(db, "pronosticos", user.uid), {
+                    nombreUsuario: user.displayName,
+                    email: user.email,
+                    pole: pole,
+                    actualizadoPole: new Date()
+                }, { merge: true });
+                alert("¡Pronóstico de Pole guardado/actualizado con éxito!");
+            } catch (e) { alert("Error: " + e.message); }
+        }
+
+        window.guardarTop10Firestore = async function() {
+            const user = auth.currentUser;
+            if (!user) { alert("Inicia sesión primero."); return; }
+            const top10 = [];
+            for (let i = 1; i <= 10; i++) top10.push(document.getElementById(`puesto-${i}`).value);
+
+            try {
+                await setDoc(doc(db, "pronosticos", user.uid), {
+                    nombreUsuario: user.displayName,
+                    email: user.email,
+                    top10: top10,
+                    actualizadoTop10: new Date()
+                }, { merge: true });
+                alert("¡Pronóstico de Top 10 guardado/actualizado con éxito!");
+            } catch (e) { alert("Error: " + e.message); }
+        }
+
+        async function cargarPronosticosUsuario(db, uid) {
+            try {
+                const docSnap = await getDoc(doc(db, "pronosticos", uid));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.pole) document.getElementById("pole-select").value = data.pole;
+                    if (data.top10) {
+                        data.top10.forEach((p, idx) => {
+                            let sel = document.getElementById(`puesto-${idx + 1}`);
+                            if (sel) sel.value = p;
+                        });
+                        actualizarContadorCompletados();
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // FUNCIONES PARA EL MODAL DE "VER MI PRONÓSTICO"
+        window.abrirModalMiPronostico = async function() {
+            const user = auth.currentUser;
+            if (!user) { alert("Inicia sesión para ver tu pronóstico."); return; }
+            
+            const contenedor = document.getElementById("contenido-mi-pronostico");
+            contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Cargando tu pronóstico...</p>";
+            document.getElementById("modal-mi-pronostico").classList.remove("hidden");
+
+            try {
+                const docSnap = await getDoc(doc(db, "pronosticos", user.uid));
+                if (!docSnap.exists()) {
+                    contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Aún no has guardado ningún pronóstico en este GP.</p>";
+                    return;
+                }
+
+                const data = docSnap.data();
+                let html = `
+                    <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-1">
+                        <span class="text-[10px] uppercase font-bold text-red-500">Poleman Elegido</span>
+                        <p class="text-xs font-bold text-white">${data.pole || 'No definido'}</p>
+                    </div>
+                    <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-2">
+                        <span class="text-[10px] uppercase font-bold text-red-500">Top 10 Elegido</span>
+                `;
+
+                if (data.top10 && Array.isArray(data.top10) && data.top10.length > 0) {
+                    html += "<div class='space-y-1.5'>";
+                    data.top10.forEach((piloto, idx) => {
+                        html += `
+                            <div class="flex items-center space-x-2 text-xs bg-black p-2 rounded-lg border border-zinc-800/80">
+                                <span class="w-5 h-5 flex items-center justify-center bg-red-600 text-white font-black rounded text-[10px]">${idx + 1}</span>
+                                <span class="text-zinc-200">${piloto || 'Vacío'}</span>
+                            </div>
+                        `;
+                    });
+                    html += "</div>";
+                } else {
+                    html += "<p class='text-xs text-zinc-400'>No has guardado pilotos en el Top 10.</p>";
+                }
+
+                html += "</div>";
+                contenedor.innerHTML = html;
+            } catch (e) {
+                contenedor.innerHTML = "<p class='text-xs text-red-500'>Error al cargar el pronóstico.</p>";
+            }
+        }
+
+        window.cerrarModalMiPronostico = function() {
+            document.getElementById("modal-mi-pronostico").classList.add("hidden");
+        }
+
+        window.ejecutarCalculoAutomaticoPuntos = async function() {
+            const poleReal = document.getElementById("admin-pole-real").value;
+            const top10Real = [];
+            for (let i = 1; i <= 10; i++) top10Real.push(document.getElementById(`admin-puesto-${i}`).value);
+            if (!poleReal) { alert("Selecciona el Poleman real."); return; }
+
+            try {
+                await setDoc(doc(db, "resultados", "oficial"), { poleReal, top10Real, calculadoEn: new Date() });
+                const querySnapshot = await getDocs(collection(db, "pronosticos"));
+                const matrizDiferencia = { 0: 25, 1: 18, 2: 15, 3: 12, 4: 10, 5: 8, 6: 6, 7: 4, 8: 2, 9: 1 };
+
+                for (const docUser of querySnapshot.docs) {
+                    let datos = docUser.data();
+                    let puntos = 0;
+
+                    if (datos.pole && datos.pole === poleReal) puntos += 25;
+
+                    if (datos.top10 && Array.isArray(datos.top10)) {
+                        let podioExacto = true, top5Exacto = true;
+                        datos.top10.forEach((piloto, index) => {
+                            if (!piloto) return;
+                            let pred = index + 1;
+                            let realIdx = top10Real.indexOf(piloto);
+                            if (realIdx !== -1) {
+                                let realPos = realIdx + 1;
+                                let diff = Math.abs(pred - realPos);
+                                if (matrizDiferencia[diff] !== undefined) puntos += matrizDiferencia[diff];
+                                if (pred <= 3 && pred !== realPos) podioExacto = false;
+                                if (pred <= 5 && pred !== realPos) top5Exacto = false;
+                            } else {
+                                podioExacto = false; top5Exacto = false;
+                            }
+                        });
+                        if (podioExacto && datos.top10.slice(0, 3).filter(Boolean).length === 3) puntos += 25;
+                        if (top5Exacto && datos.top10.slice(0, 5).filter(Boolean).length === 5) puntos += 50;
+                    }
+
+                    await updateDoc(doc(db, "pronosticos", docUser.id), { puntosTotal: puntos });
+                }
+                alert("¡Puntos calculados y actualizados para todos!");
+                cargarTablaGeneral();
+            } catch (e) { alert("Error al calcular: " + e.message); }
+        }
+
+        async function cargarTablaGeneral() {
+            const contenedor = document.getElementById("lista-tabla-general");
+            contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Cargando tabla...</p>";
+            try {
+                const querySnapshot = await getDocs(collection(db, "pronosticos"));
+                if (querySnapshot.empty) { contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Aún no hay pronósticos.</p>"; return; }
+                
+                let participantes = [];
+                querySnapshot.forEach(d => participantes.push({ id: d.id, ...d.data() }));
+                participantes.sort((a, b) => (b.puntosTotal || 0) - (a.puntosTotal || 0));
+
+                const currentUser = auth.currentUser;
+
+                let html = '<div class="space-y-3">';
+                participantes.forEach((p, idx) => {
+                    let esMiFila = currentUser && currentUser.uid === p.id;
+                    html += `
+                        <div class="bg-zinc-900 border ${esMiFila ? 'border-red-600/80 shadow-lg shadow-red-600/10' : 'border-zinc-800'} p-4 rounded-xl flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <span class="w-8 h-8 flex items-center justify-center font-black rounded-lg border text-xs ${idx === 0 ? 'bg-yellow-500 text-black border-yellow-400' : 'border-zinc-700'}">#${idx + 1}</span>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                                        ${p.nombreUsuario || 'Participante'} 
+                                        ${esMiFila ? '<span class="bg-red-950 text-red-400 text-[10px] px-2 py-0.5 rounded border border-red-800 font-bold">Tú</span>' : ''}
+                                    </h4>
+                                    <p class="text-[11px] text-zinc-400">Pole: <span class="text-red-500 font-semibold">${p.pole || 'No definido'}</span></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                ${esMiFila ? `
+                                    <button onclick="abrirModalMiPronostico()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
+                                        👁️ Ver mi apuesta
+                                    </button>
+                                ` : ''}
+                                <div class="bg-red-950/80 border border-red-800/60 px-4 py-2 rounded-xl text-center">
+                                    <span class="block text-[10px] text-red-400 uppercase font-bold">Puntaje</span>
+                                    <span class="text-base font-black text-white">${p.puntosTotal || 0} pts</span>
+                                }}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                contenedor.innerHTML = html;
+            } catch (e) { contenedor.innerHTML = "<p class='text-red-500'>Error al cargar tabla.</p>"; }
+        }
+    </script>
+</body>
+</html>
