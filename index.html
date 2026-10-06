@@ -6,10 +6,10 @@
     <title>PRODE F1 - TEMPORADA 2026</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs corregidos -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, getDocs, collection, updateField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",
@@ -716,7 +716,6 @@
                 data.usuario = usuarioActual;
                 data.pole = poleVal;
                 
-                // Actualizar lista de participantes en Firestore
                 let metaRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_meta`);
                 let metaSnap = await getDoc(metaRef);
                 let participantes = metaSnap.exists() ? (metaSnap.data().participantes || []) : [];
@@ -925,12 +924,10 @@
                     let poleUser = userData.pole;
                     let top10User = userData.top10 || {};
 
-                    // Cálculo Pole (+25 pts)
                     if (poleUser && poleUser === poleReal) {
                         pts += 25;
                     }
 
-                    // Cálculo Top 10 y Matriz de diferencias
                     let exactPodiumCount = 0;
                     let exactTop5Count = true;
 
@@ -968,7 +965,6 @@
 
                     resultadosFecha[user] = pts;
 
-                    // Actualizar puntos en la tabla general de la nube
                     let genRef = doc(window.db, "pronosticos", `general_${user}`);
                     let genSnap = await getDoc(genRef);
                     let ptsAcumuladosPrevios = genSnap.exists() ? (genSnap.data().puntos || 0) : 0;
@@ -980,7 +976,6 @@
                     await setDoc(genRef, { usuario: user, puntos: nuevosAcumulados, [fechaPuntajeKey]: pts }, { merge: true });
                 }
 
-                // Guardar resultados de la fecha
                 await setDoc(doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_resultados`), { resultados: resultadosFecha }, { merge: true });
                 alert("¡Resultados calculados y guardados en la nube con éxito!");
                 cargarTablasFirebase();
@@ -991,7 +986,6 @@
         }
 
         window.cargarTablasFirebase = async function() {
-            // Cargar Tabla de la Fecha
             const listaFechaEl = document.getElementById("lista-tabla-fecha");
             try {
                 const resRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_resultados`);
@@ -1027,7 +1021,6 @@
                 console.error(e);
             }
 
-            // Cargar Tabla General desde Firestore
             const listaGeneralEl = document.getElementById("lista-tabla-general");
             try {
                 const querySnapshot = await getDocs(collection(window.db, "pronosticos"));
