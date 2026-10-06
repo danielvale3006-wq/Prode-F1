@@ -6,10 +6,10 @@
     <title>PRODE F1 - TEMPORADA 2026</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs corregidos -->
+    <!-- Firebase SDKs unificados y corregidos -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",
@@ -25,6 +25,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         window.db = db;
+        window.F_Firestore = { doc, setDoc, getDoc, getDocs, collection };
     </script>
 </head>
 <body class="bg-black text-white font-sans min-h-screen selection:bg-red-600 selection:text-white pb-20 md:pb-0">
@@ -329,10 +330,8 @@
         </div>
     </div>
 
-    <!-- Script Principal con Firebase Firestore -->
-    <script type="module">
-        import { doc, setDoc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
+    <!-- Script Principal con la lógica y llamadas seguras a Firebase -->
+    <script>
         const ADMIN_USER = "daniel"; 
 
         const CALENDARIO_F1_2026 = [
@@ -709,6 +708,7 @@
             }
 
             try {
+                const { doc, setDoc, getDoc } = window.F_Firestore;
                 const docRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_${usuarioActual}`);
                 let docSnap = await getDoc(docRef);
                 let data = docSnap.exists() ? docSnap.data() : {};
@@ -760,6 +760,7 @@
             }
 
             try {
+                const { doc, setDoc, getDoc } = window.F_Firestore;
                 const docRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_${usuarioActual}`);
                 let docSnap = await getDoc(docRef);
                 let data = docSnap.exists() ? docSnap.data() : {};
@@ -788,6 +789,7 @@
             const contadorEl = document.getElementById("contador-participantes-votos");
             const avatarsEl = document.getElementById("lista-avatars-votos");
             try {
+                const { doc, getDoc } = window.F_Firestore;
                 const metaRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_meta`);
                 const metaSnap = await getDoc(metaRef);
                 let lista = metaSnap.exists() ? (metaSnap.data().participantes || []) : [];
@@ -824,6 +826,7 @@
             if (!contenedor) return;
 
             try {
+                const { doc, getDoc } = window.F_Firestore;
                 const docRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_${usuarioActual}`);
                 const docSnap = await getDoc(docRef);
                 let data = docSnap.exists() ? docSnap.data() : {};
@@ -909,6 +912,7 @@
             }
 
             try {
+                const { doc, setDoc, getDoc } = window.F_Firestore;
                 const metaRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_meta`);
                 const metaSnap = await getDoc(metaRef);
                 let listaParticipantes = metaSnap.exists() ? (metaSnap.data().participantes || []) : [];
@@ -988,6 +992,7 @@
         window.cargarTablasFirebase = async function() {
             const listaFechaEl = document.getElementById("lista-tabla-fecha");
             try {
+                const { doc, getDoc, getDocs, collection } = window.F_Firestore;
                 const resRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_resultados`);
                 const resSnap = await getDoc(resRef);
                 let resultadosFecha = resSnap.exists() ? (resSnap.data().resultados || {}) : {};
@@ -1023,6 +1028,7 @@
 
             const listaGeneralEl = document.getElementById("lista-tabla-general");
             try {
+                const { getDocs, collection } = window.F_Firestore;
                 const querySnapshot = await getDocs(collection(window.db, "pronosticos"));
                 let arrayGeneral = [];
                 querySnapshot.forEach((d) => {
