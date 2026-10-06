@@ -16,7 +16,7 @@
             <h1 class="text-lg font-black tracking-wider uppercase italic">PRODE F1 <span class="text-red-600 font-bold">2026</span></h1>
         </div>
         <nav class="hidden md:flex space-x-6 text-xs font-semibold">
-            <a href="#" id="nav-pronostico" class="text-red-500 border-b-2 border-red-600 pb-1 font-bold">Mi Pronóstico</a>
+            <a href="#" id="nav-pronostico" class="text-red-500 border-b-2 border-red-600 pb-1 font-bold">Mis Pronósticos</a>
             <a href="#" id="nav-tabla" class="text-zinc-400 hover:text-white transition pb-1">Tabla General y Puntos</a>
             <a href="#" id="nav-reglas" class="text-zinc-400 hover:text-white transition pb-1">Reglas y Puntuación</a>
             <a href="#" id="nav-admin" class="text-zinc-400 hover:text-white transition pb-1 hidden">Admin GP</a>
@@ -31,66 +31,78 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
                 
-        <!-- SECCIÓN 1: MI PRONÓSTICO -->
+        <!-- SECCIÓN 1: MIS PRONÓSTICOS (DOBLE TANDA) -->
         <div id="seccion-pronostico" class="space-y-6">
             <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-black border border-zinc-800 p-6 rounded-2xl relative overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div>
                     <span class="bg-red-950 text-red-500 text-[10px] px-3 py-1 rounded-full border border-red-800/60 font-black uppercase tracking-widest">Gran Premio 2026</span>
-                    <h2 class="text-2xl md:text-3xl font-black mt-2 tracking-tight uppercase">Arma tu Prode de Carrera</h2>
-                    <p class="text-zinc-400 text-xs mt-1">Selecciona el Poleman (Etapa 1) y tu Top 10 oficial (Etapa 2).</p>
-                </div>
-                                
-                <div class="flex space-x-3">
-                    <button onclick="guardarPronosticoFirestore()" class="bg-red-600 hover:bg-red-700 text-white font-black px-5 py-2.5 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
-                        Guardar Pronóstico
-                    </button>
-                    <button onclick="reiniciarFormulario()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold px-4 py-2.5 rounded-xl text-xs border border-zinc-700 transition cursor-pointer uppercase">
-                        Reiniciar
-                    </button>
+                    <h2 class="text-2xl md:text-3xl font-black mt-2 tracking-tight uppercase">Panel de Pronósticos por Tanda</h2>
+                    <p class="text-zinc-400 text-xs mt-1">Vota la Pole (Sábado) y el Top 10 (Domingo). Puedes modificar tus elecciones hasta 5 min antes de cada sesión.</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- COLUMNA IZQUIERDA: POLE Y PARRILLA -->
-                <div class="lg:col-span-5 space-y-6">
-                    <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="bg-red-600 text-white font-black text-[10px] px-2.5 py-1 rounded-lg">01</span>
-                            <h3 class="font-black text-xs uppercase tracking-wider">Poleman (Clasificación)</h3>
-                            <span class="text-[10px] bg-zinc-900 text-zinc-400 px-2.5 py-1 rounded-lg border border-zinc-800 font-bold">+25 pts</span>
-                        </div>
-                        <select id="pole-select" class="w-full bg-black text-white border border-zinc-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-red-600 transition">
+            <!-- TANDA 1: POLE POSITION -->
+            <div class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl shadow-xl space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-zinc-800 pb-4">
+                    <div>
+                        <span class="bg-red-600 text-white font-black text-[10px] px-2.5 py-1 rounded-lg">TANDA 1</span>
+                        <h3 class="font-black text-sm uppercase tracking-wider inline-block ml-2">Pole Position (Clasificación Sábado)</h3>
+                    </div>
+                    <div id="estado-tanda-1" class="text-xs font-bold px-3 py-1 rounded-full border"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-zinc-400 mb-2">Selecciona tu piloto para la Pole (+25 pts)</label>
+                        <select id="pole-select" class="w-full bg-black text-white border border-zinc-700 rounded-xl p-3 text-xs focus:outline-none focus:border-red-600 transition">
                             <option value="">-- Selecciona el Poleman --</option>
                         </select>
                     </div>
+                    <div class="flex md:justify-end">
+                        <button id="btn-guardar-pole" onclick="guardarPoleFirestore()" class="bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
+                            Guardar Pronóstico de Pole
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-black text-xs uppercase tracking-wider">🏎️ Parrilla 2026 (Clic para asignar)</h3>
-                            <span class="text-[10px] text-zinc-400 bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-800 font-bold">22 Pilotos</span>
-                        </div>
-                        <div>
-                            <input type="text" id="buscar-piloto" placeholder="Buscar piloto..." class="w-full bg-black text-white text-xs border border-zinc-700 rounded-xl px-3 py-2 focus:outline-none focus:border-red-600 transition">
-                        </div>
-                        <div id="parrilla-container" class="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                            <!-- Generado por JS -->
-                        </div>
+            <!-- TANDA 2: TOP 10 DE CARRERA -->
+            <div class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl shadow-xl space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-zinc-800 pb-4">
+                    <div>
+                        <span class="bg-red-600 text-white font-black text-[10px] px-2.5 py-1 rounded-lg">TANDA 2</span>
+                        <h3 class="font-black text-sm uppercase tracking-wider inline-block ml-2">Top 10 de Carrera (Domingo)</h3>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span id="contador-completados" class="text-[11px] font-bold bg-black text-zinc-300 px-3 py-1.5 rounded-full border border-zinc-800">0 / 10 completados</span>
+                        <div id="estado-tanda-2" class="text-xs font-bold px-3 py-1 rounded-full border"></div>
                     </div>
                 </div>
 
-                <!-- COLUMNA DERECHA: TOP 10 -->
-                <div class="lg:col-span-7">
-                    <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl flex flex-col h-full">
-                        <div class="flex justify-between items-center mb-4">
-                            <div>
-                                <span class="bg-red-600 text-white font-black text-[10px] px-2.5 py-1 rounded-lg">02</span>
-                                <h3 class="font-black text-sm uppercase tracking-wider inline-block ml-1">Top 10 de Carrera</h3>
-                            </div>
-                            <span id="contador-completados" class="text-[11px] font-bold bg-black text-zinc-300 px-3 py-1.5 rounded-full border border-zinc-800">0 / 10 completados</span>
-                        </div>
-                        <div id="top-10-container" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- PARRILLA DE PILOTOS PARA ARRASTRAR/CLIC -->
+                    <div class="lg:col-span-5 space-y-3">
+                        <h4 class="font-black text-xs uppercase tracking-wider text-zinc-400">🏎️ Parrilla 2026 (Clic para asignar)</h4>
+                        <input type="text" id="buscar-piloto" placeholder="Buscar piloto..." class="w-full bg-black text-white text-xs border border-zinc-700 rounded-xl px-3 py-2 focus:outline-none focus:border-red-600 transition">
+                        <div id="parrilla-container" class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
                             <!-- Generado por JS -->
+                        </div>
+                    </div>
+
+                    <!-- SELECCIONADOR TOP 10 -->
+                    <div class="lg:col-span-7 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-black text-xs uppercase tracking-wider text-zinc-400">Tus puestos pronosticados</h4>
+                            <button onclick="reiniciarTop10()" class="text-[11px] text-zinc-400 hover:text-white underline cursor-pointer">Limpiar Top 10</button>
+                        </div>
+                        <div id="top-10-container" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                            <!-- Generado por JS -->
+                        </div>
+                        <div class="flex justify-end pt-2">
+                            <button id="btn-guardar-top10" onclick="guardarTop10Firestore()" class="bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
+                                Guardar Pronóstico de Top 10
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -119,9 +131,9 @@
                 <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl space-y-2 shadow-xl">
                     <div class="flex items-center space-x-2">
                         <span class="text-red-500 font-bold">🏁</span>
-                        <h3 class="font-black text-sm uppercase tracking-wider">Etapa 1: Poleman (25 Puntos)</h3>
+                        <h3 class="font-black text-sm uppercase tracking-wider">Tanda 1: Poleman (25 Puntos)</h3>
                     </div>
-                    <p class="text-xs text-zinc-300 leading-relaxed">Si aciertas exactamente el piloto que consigue la Pole Position el sábado, obtienes 25 puntos directos.</p>
+                    <p class="text-xs text-zinc-300 leading-relaxed">Vota la Pole el sábado. Cierra 5 minutos antes de la clasificación.</p>
                 </div>
 
                 <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl space-y-2 shadow-xl">
@@ -130,55 +142,32 @@
                         <h3 class="font-black text-sm uppercase tracking-wider">Bonos Especiales</h3>
                     </div>
                     <ul class="text-xs text-zinc-300 space-y-2">
-                        <li>• <strong>Bono Podio (P1, P2 y P3 exactos):</strong> <strong class="text-red-500">+25 pts extra</strong></li>
-                        <li>• <strong>Bono Top 5 (Primeros 5 puestos exactos):</strong> <strong class="text-red-500">+50 pts extra</strong></li>
+                        <li>• <strong>Bono Podio exacto:</strong> <strong class="text-red-500">+25 pts extra</strong></li>
+                        <li>• <strong>Bono Top 5 exacto:</strong> <strong class="text-red-500">+50 pts extra</strong></li>
                     </ul>
-                </div>
-
-                <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl space-y-2 shadow-xl md:col-span-2">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-red-500 font-bold">📊</span>
-                        <h3 class="font-black text-sm uppercase tracking-wider">Etapa 2: Top 10 (Matriz de Diferencial)</h3>
-                    </div>
-                    <p class="text-xs text-zinc-300">Los puntos por posición varían según la precisión del puesto:</p>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 bg-black p-3 rounded-xl text-[11px] text-zinc-300 border border-zinc-800 mt-2">
-                        <div>• Exacta: <strong class="text-white">+25 pts</strong></div>
-                        <div>• ±1 dif: <strong class="text-white">+18 pts</strong></div>
-                        <div>• ±2 dif: <strong class="text-white">+15 pts</strong></div>
-                        <div>• ±3 dif: <strong class="text-white">+12 pts</strong></div>
-                        <div>• ±4 dif: <strong class="text-white">+10 pts</strong></div>
-                        <div>• ±5 dif: <strong class="text-white">+8 pts</strong></div>
-                        <div>• ±6 dif: <strong class="text-white">+6 pts</strong></div>
-                        <div>• ±7 dif: <strong class="text-white">+4 pts</strong></div>
-                        <div>• ±8 dif: <strong class="text-white">+2 pts</strong></div>
-                        <div>• ±9 dif: <strong class="text-white">+1 pt</strong></div>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN 4: PANEL DE ADMINISTRADOR (CARGAR RESULTADOS REALES) -->
+        <!-- SECCIÓN 4: PANEL DE ADMINISTRADOR -->
         <div id="seccion-admin" class="space-y-6 hidden">
             <div class="bg-zinc-950 border border-red-900/50 p-6 rounded-2xl shadow-xl space-y-6">
                 <div>
                     <span class="bg-red-950 text-red-500 text-[10px] px-3 py-1 rounded-full border border-red-800/60 font-black uppercase tracking-widest">Panel de Control</span>
                     <h2 class="text-xl font-black uppercase tracking-wider mt-2">Cargar Resultados Reales del GP</h2>
-                    <p class="text-zinc-400 text-xs mt-1">Ingresa el resultado oficial para que el motor calcule automáticamente los puntos de todos los usuarios.</p>
                 </div>
 
                 <div class="space-y-4">
                     <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-2">
                         <label class="block text-xs font-bold uppercase text-red-500">Poleman Oficial (Sábado)</label>
-                        <select id="admin-pole-real" class="w-full bg-black text-white border border-zinc-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-red-600 transition">
+                        <select id="admin-pole-real" class="w-full bg-black text-white border border-zinc-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-red-600">
                             <option value="">-- Selecciona el Poleman Real --</option>
                         </select>
                     </div>
 
                     <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-3">
                         <label class="block text-xs font-bold uppercase text-red-500">Top 10 Oficial de Carrera (Domingo)</label>
-                        <div id="admin-top10-container" class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <!-- Generado por JS -->
-                        </div>
+                        <div id="admin-top10-container" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
                     </div>
 
                     <div class="flex justify-end pt-2">
@@ -212,33 +201,27 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
+        const ADMIN_EMAIL = "eliperez235@gmail.com";
 
-        // Tu correo configurado como Administrador para ver el panel de resultados
-        const ADMIN_EMAIL = "eliperez235@gmail.com"; // Puedes cambiarlo si usas otra cuenta de Google
+        // CONFIGURACIÓN DE FECHAS DE CIERRE (Modifica aquí los horarios de cada GP)
+        // Formato: "YYYY-MM-DDTHH:MM:SS" (Hora local o UTC según prefieras)
+        const CONFIG_FECHAS_GP = {
+            cierrePole: new Date("2026-10-10T14:00:00"),  // Ejemplo: Sábado 14:00 (cierra 5 min antes de clasu)
+            cierreCarrera: new Date("2026-10-11T13:00:00") // Ejemplo: Domingo 13:00 (cierra 5 min antes de carrera)
+        };
 
         const pilotos2026 = [
-            "Lando Norris #1 (McLaren)",
-            "Oscar Piastri #81 (McLaren)",
-            "George Russell #63 (Mercedes)",
-            "Kimi Antonelli #12 (Mercedes)",
-            "Charles Leclerc #16 (Ferrari)",
-            "Lewis Hamilton #44 (Ferrari)",
-            "Max Verstappen #3 (Red Bull Racing)",
-            "Isack Hadjar #6 (Red Bull Racing)",
-            "Fernando Alonso #14 (Aston Martin)",
-            "Lance Stroll #18 (Aston Martin)",
-            "Pierre Gasly #10 (Alpine)",
-            "Franco Colapinto #43 (Alpine)",
-            "Alexander Albon #23 (Williams)",
-            "Carlos Sainz #55 (Williams)",
-            "Liam Lawson #30 (Racing Bulls)",
-            "Arvid Lindblad #41 (Racing Bulls)",
-            "Esteban Ocon #31 (Haas F1 Team)",
-            "Oliver Bearman #87 (Haas F1 Team)",
-            "Nico Hülkenberg #27 (Audi)",
-            "Gabriel Bortoleto #5 (Audi)",
-            "Sergio Pérez #11 (Cadillac)",
-            "Valtteri Bottas #77 (Cadillac)"
+            "Lando Norris #1 (McLaren)", "Oscar Piastri #81 (McLaren)",
+            "George Russell #63 (Mercedes)", "Kimi Antonelli #12 (Mercedes)",
+            "Charles Leclerc #16 (Ferrari)", "Lewis Hamilton #44 (Ferrari)",
+            "Max Verstappen #3 (Red Bull Racing)", "Isack Hadjar #6 (Red Bull Racing)",
+            "Fernando Alonso #14 (Aston Martin)", "Lance Stroll #18 (Aston Martin)",
+            "Pierre Gasly #10 (Alpine)", "Franco Colapinto #43 (Alpine)",
+            "Alexander Albon #23 (Williams)", "Carlos Sainz #55 (Williams)",
+            "Liam Lawson #30 (Racing Bulls)", "Arvid Lindblad #41 (Racing Bulls)",
+            "Esteban Ocon #31 (Haas F1 Team)", "Oliver Bearman #87 (Haas F1 Team)",
+            "Nico Hülkenberg #27 (Audi)", "Gabriel Bortoleto #5 (Audi)",
+            "Sergio Pérez #11 (Cadillac)", "Valtteri Bottas #77 (Cadillac)"
         ];
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -246,52 +229,35 @@
                 inicializarInterfaz();
                 configurarAutenticacion(auth, db);
                 configurarNavegacion();
+                verificarLimitesTiempo();
             }, 50);
         });
 
         function inicializarInterfaz() {
             const poleSelect = document.getElementById("pole-select");
-            const top10Container = document.getElementById("top-10-container");
-            const buscarPilotoInput = document.getElementById("buscar-piloto");
-            
-            // Admin inputs
             const adminPoleReal = document.getElementById("admin-pole-real");
+            const top10Container = document.getElementById("top-10-container");
             const adminTop10Container = document.getElementById("admin-top10-container");
 
             if (poleSelect) {
                 poleSelect.innerHTML = '<option value="">-- Selecciona el Poleman --</option>';
-                pilotos2026.forEach(piloto => {
-                    let opt = document.createElement("option");
-                    opt.value = piloto;
-                    opt.textContent = piloto;
-                    poleSelect.appendChild(opt);
-                });
+                pilotos2026.forEach(p => poleSelect.appendChild(new Option(p, p)));
             }
-
             if (adminPoleReal) {
                 adminPoleReal.innerHTML = '<option value="">-- Selecciona el Poleman Real --</option>';
-                pilotos2026.forEach(piloto => {
-                    let opt = document.createElement("option");
-                    opt.value = piloto;
-                    opt.textContent = piloto;
-                    adminPoleReal.appendChild(opt);
-                });
+                pilotos2026.forEach(p => adminPoleReal.appendChild(new Option(p, p)));
             }
 
             if (top10Container) {
                 top10Container.innerHTML = "";
                 for (let i = 1; i <= 10; i++) {
                     let div = document.createElement("div");
-                    div.className = "flex items-center space-x-2 bg-zinc-900 p-2.5 rounded-xl border border-zinc-800";
-                    
+                    div.className = "flex items-center space-x-2 bg-zinc-900 p-2 rounded-xl border border-zinc-800";
                     let optionsHtml = '<option value="">-- Puesto ' + i + ' --</option>';
-                    pilotos2026.forEach(p => {
-                        optionsHtml += '<option value="' + p + '">' + p + '</option>';
-                    });
-
+                    pilotos2026.forEach(p => optionsHtml += '<option value="' + p + '">' + p + '</option>');
                     div.innerHTML = `
-                        <span class="w-6 h-6 flex items-center justify-center bg-red-600 text-white font-black rounded-lg text-xs shadow-md shadow-red-600/30">${i < 10 ? '0' + i : i}</span>
-                        <select id="puesto-${i}" onchange="actualizarContadorCompletados()" class="w-full bg-black text-white border border-zinc-700 rounded-lg p-2 text-xs focus:outline-none focus:border-red-600 transition">
+                        <span class="w-6 h-6 flex items-center justify-center bg-red-600 text-white font-black rounded-lg text-xs">${i < 10 ? '0' + i : i}</span>
+                        <select id="puesto-${i}" onchange="actualizarContadorCompletados()" class="w-full bg-black text-white border border-zinc-700 rounded-lg p-2 text-xs focus:outline-none focus:border-red-600">
                             ${optionsHtml}
                         </select>
                     `;
@@ -304,12 +270,8 @@
                 for (let i = 1; i <= 10; i++) {
                     let div = document.createElement("div");
                     div.className = "flex items-center space-x-2 bg-black p-2 rounded-lg border border-zinc-800";
-                    
                     let optionsHtml = '<option value="">-- Puesto Real ' + i + ' --</option>';
-                    pilotos2026.forEach(p => {
-                        optionsHtml += '<option value="' + p + '">' + p + '</option>';
-                    });
-
+                    pilotos2026.forEach(p => optionsHtml += '<option value="' + p + '">' + p + '</option>');
                     div.innerHTML = `
                         <span class="w-5 h-5 flex items-center justify-center bg-zinc-800 text-zinc-300 font-bold rounded text-[10px]">${i}</span>
                         <select id="admin-puesto-${i}" class="w-full bg-zinc-950 text-white border border-zinc-800 rounded p-1.5 text-xs focus:outline-none focus:border-red-600">
@@ -321,36 +283,31 @@
             }
 
             renderizarParrilla(pilotos2026);
-
-            if (buscarPilotoInput) {
-                buscarPilotoInput.addEventListener("input", (e) => {
-                    const texto = e.target.value.toLowerCase();
-                    const filtrados = pilotos2026.filter(p => p.toLowerCase().includes(texto));
-                    renderizarParrilla(filtrados);
-                });
-            }
+            document.getElementById("buscar-piloto")?.addEventListener("input", (e) => {
+                const texto = e.target.value.toLowerCase();
+                renderizarParrilla(pilotos2026.filter(p => p.toLowerCase().includes(texto)));
+            });
         }
 
         function renderizarParrilla(listaPilotos) {
-            const parrillaContainer = document.getElementById("parrilla-container");
-            if (!parrillaContainer) return;
-            
-            parrillaContainer.innerHTML = "";
+            const container = document.getElementById("parrilla-container");
+            if (!container) return;
+            container.innerHTML = "";
             listaPilotos.forEach(piloto => {
                 let btn = document.createElement("button");
                 btn.type = "button";
-                btn.className = "text-left text-[11px] bg-zinc-900 hover:bg-red-600 text-zinc-300 hover:text-white p-2.5 rounded-lg border border-zinc-800 hover:border-red-500 transition font-medium truncate cursor-pointer shadow-sm";
+                btn.className = "text-left text-[11px] bg-zinc-900 hover:bg-red-600 text-zinc-300 hover:text-white p-2.5 rounded-lg border border-zinc-800 transition truncate cursor-pointer";
                 btn.textContent = piloto;
                 btn.onclick = () => asignarSiguientePuesto(piloto);
-                parrillaContainer.appendChild(btn);
+                container.appendChild(btn);
             });
         }
 
         window.asignarSiguientePuesto = function(piloto) {
             for (let i = 1; i <= 10; i++) {
-                let select = document.getElementById(`puesto-${i}`);
-                if (select && !select.value) {
-                    select.value = piloto;
+                let sel = document.getElementById(`puesto-${i}`);
+                if (sel && !sel.value) {
+                    sel.value = piloto;
                     actualizarContadorCompletados();
                     break;
                 }
@@ -360,314 +317,43 @@
         window.actualizarContadorCompletados = function() {
             let completados = 0;
             for (let i = 1; i <= 10; i++) {
-                let select = document.getElementById(`puesto-${i}`);
-                if (select && select.value) completados++;
+                if (document.getElementById(`puesto-${i}`)?.value) completados++;
             }
-            const contadorEl = document.getElementById("contador-completados");
-            if (contadorEl) contadorEl.textContent = `${completados} / 10 completados`;
+            const el = document.getElementById("contador-completados");
+            if (el) el.textContent = `${completados} / 10 completados`;
         }
 
-        function configurarNavegacion() {
-            const navPronostico = document.getElementById("nav-pronostico");
-            const navTabla = document.getElementById("nav-tabla");
-            const navReglas = document.getElementById("nav-reglas");
-            const navAdmin = document.getElementById("nav-admin");
-
-            const seccionPronostico = document.getElementById("seccion-pronostico");
-            const seccionTabla = document.getElementById("seccion-tabla");
-            const seccionReglas = document.getElementById("seccion-reglas");
-            const seccionAdmin = document.getElementById("seccion-admin");
-
-            function cambiarVista(activa) {
-                [navPronostico, navTabla, navReglas, navAdmin].forEach(el => {
-                    if (el) el.className = "text-zinc-400 hover:text-white transition pb-1 font-medium";
-                });
-                [seccionPronostico, seccionTabla, seccionReglas, seccionAdmin].forEach(el => {
-                    if (el) el.classList.add("hidden");
-                });
-
-                if (activa === 'pronostico') {
-                    navPronostico.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
-                    seccionPronostico.classList.remove("hidden");
-                } else if (activa === 'tabla') {
-                    navTabla.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
-                    seccionTabla.classList.remove("hidden");
-                    cargarTablaGeneral();
-                } else if (activa === 'reglas') {
-                    navReglas.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
-                    seccionReglas.classList.remove("hidden");
-                } else if (activa === 'admin') {
-                    if (navAdmin) navAdmin.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
-                    if (seccionAdmin) seccionAdmin.classList.remove("hidden");
-                    cargarResultadosAdminEnFormulario();
-                }
-            }
-
-            navPronostico.onclick = (e) => { e.preventDefault(); cambiarVista('pronostico'); };
-            navTabla.onclick = (e) => { e.preventDefault(); cambiarVista('tabla'); };
-            navReglas.onclick = (e) => { e.preventDefault(); cambiarVista('reglas'); };
-            if (navAdmin) navAdmin.onclick = (e) => { e.preventDefault(); cambiarVista('admin'); };
-        }
-
-        function configurarAutenticacion(auth, db) {
-            const authBtn = document.getElementById("auth-btn");
-            const navAdmin = document.getElementById("nav-admin");
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    authBtn.textContent = "Cerrar Sesión (" + user.displayName.split(' ')[0] + ")";
-                    authBtn.className = "bg-zinc-800 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-zinc-700 transition shadow cursor-pointer";
-                    authBtn.onclick = () => {
-                        signOut(auth).then(() => alert("Sesión cerrada con éxito"));
-                    };
-
-                    // Mostrar pestaña Admin solo si coincide tu correo
-                    if (user.email === ADMIN_EMAIL && navAdmin) {
-                        navAdmin.classList.remove("hidden");
-                    }
-
-                    cargarPronostico(db, user.uid);
-                } else {
-                    authBtn.textContent = "Iniciar Sesión con Google";
-                    authBtn.className = "bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/30 cursor-pointer";
-                    authBtn.onclick = () => {
-                        signInWithPopup(auth, googleProvider)
-                        .then((result) => {
-                            alert("¡Bienvenido, " + result.user.displayName + "!");
-                        })
-                        .catch((error) => {
-                            alert("Error al iniciar sesión: " + error.message);
-                        });
-                    };
-                    if (navAdmin) navAdmin.classList.add("hidden");
-                }
-            });
-        }
-
-        window.guardarPronosticoFirestore = async function() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("Debes iniciar sesión con Google para guardar tu pronóstico.");
-                return;
-            }
-
-            const poleEl = document.getElementById("pole-select");
-            const pole = poleEl ? poleEl.value : "";
-            
-            const top10 = [];
-            for (let i = 1; i <= 10; i++) {
-                let selectPuesto = document.getElementById(`puesto-${i}`);
-                top10.push(selectPuesto ? selectPuesto.value : "");
-            }
-
-            try {
-                await setDoc(doc(db, "pronosticos", user.uid), {
-                    nombreUsuario: user.displayName || "Anónimo",
-                    email: user.email || "",
-                    pole: pole,
-                    top10: top10,
-                    puntosTotal: 0, // Inicial
-                    actualizado: new Date()
-                }, { merge: true });
-                
-                alert("¡Pronóstico guardado exitosamente en Firestore!");
-            } catch (e) {
-                console.error("Error al guardar:", e);
-                alert("Error al guardar el pronóstico: " + e.message);
-            }
-        }
-
-        async function cargarPronostico(db, uid) {
-            try {
-                const docSnap = await getDoc(doc(db, "pronosticos", uid));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.pole) document.getElementById("pole-select").value = data.pole;
-                    if (data.top10) {
-                        data.top10.forEach((piloto, index) => {
-                            let sel = document.getElementById(`puesto-${index + 1}`);
-                            if (sel) sel.value = piloto;
-                        });
-                        actualizarContadorCompletados();
-                    }
-                }
-            } catch (e) {
-                console.error("Error cargando pronóstico previo", e);
-            }
-        }
-
-        // --- MOTOR DE CÁLCULO AUTOMÁTICO DE PUNTOS ---
-        window.ejecutarCalculoAutomaticoPuntos = async function() {
-            const poleReal = document.getElementById("admin-pole-real").value;
-            const top10Real = [];
-            for (let i = 1; i <= 10; i++) {
-                top10Real.push(document.getElementById(`admin-puesto-${i}`).value);
-            }
-
-            if (!poleReal) {
-                alert("Por favor selecciona el Poleman real.");
-                return;
-            }
-
-            try {
-                // 1. Guardar resultados oficiales en Firestore
-                await setDoc(doc(db, "resultados", "oficial"), {
-                    poleReal: poleReal,
-                    top10Real: top10Real,
-                    calculadoEn: new Date()
-                });
-
-                // 2. Traer todos los pronósticos de la comunidad
-                const querySnapshot = await getDocs(collection(db, "pronosticos"));
-                if (querySnapshot.empty) {
-                    alert("Resultados guardados, pero no hay pronósticos de usuarios para calcular.");
-                    return;
-                }
-
-                // Matriz de puntos por diferencia
-                const matrizDiferencia = { 0: 25, 1: 18, 2: 15, 3: 12, 4: 10, 5: 8, 6: 6, 7: 4, 8: 2, 9: 1 };
-
-                // 3. Calcular puntaje para cada usuario
-                for (const docUser of querySnapshot.docs) {
-                    let datos = docUser.data();
-                    let puntosUsuario = 0;
-
-                    // Evaluar Poleman (Etapa 1)
-                    if (datos.pole && datos.pole === poleReal) {
-                        puntosUsuario += 25;
-                    }
-
-                    // Evaluar Top 10 (Etapa 2)
-                    if (datos.top10 && Array.isArray(datos.top10)) {
-                        let aciertosPodioExacto = true;
-                        let aciertosTop5Exacto = true;
-
-                        datos.top10.forEach((pilotoPronosticado, index) => {
-                            if (!pilotoPronosticado) return;
-                            let puestoPredicho = index + 1; // 1 al 10
-                            let puestoRealIndex = top10Real.indexOf(pilotoPronosticado);
-
-                            if (puestoRealIndex !== -1) {
-                                let puestoRealReal = puestoRealIndex + 1;
-                                let diferencia = Math.abs(puestoPredicho - puestoRealReal);
-                                
-                                if (matrizDiferencia[diferencia] !== undefined) {
-                                    puntosUsuario += matrizDiferencia[diferencia];
-                                }
-
-                                // Validación de bonos exactos
-                                if (puestoPredicho <= 3 && puestoPredicho !== puestoRealReal) {
-                                    aciertosPodioExacto = false;
-                                }
-                                if (puestoPredicho <= 5 && puestoPredicho !== puestoRealReal) {
-                                    aciertosTop5Exacto = false;
-                                }
-                            } else {
-                                // Si el piloto ni siquiera entró en el Top 10 real
-                                aciertosPodioExacto = false;
-                                aciertosTop5Exacto = false;
-                            }
-                        });
-
-                        // Aplicar Bonos
-                        if (aciertosPodioExacto && datos.top10.slice(0, 3).filter(Boolean).length === 3) {
-                            puntosUsuario += 25; // Bono Podio
-                        }
-                        if (aciertosTop5Exacto && datos.top10.slice(0, 5).filter(Boolean).length === 5) {
-                            puntosUsuario += 50; // Bono Top 5
-                        }
-                    }
-
-                    // Actualizar puntos en Firestore para este usuario
-                    await updateDoc(doc(db, "pronosticos", docUser.id), {
-                        puntosTotal: puntosUsuario
-                    });
-                }
-
-                alert("¡Cálculo automático completado con éxito! Revisa la Tabla General.");
-                cargarTablaGeneral();
-            } catch (e) {
-                console.error("Error al calcular puntos:", e);
-                alert("Error al procesar el cálculo: " + e.message);
-            }
-        }
-
-        async function cargarResultadosAdminEnFormulario() {
-            try {
-                const docSnap = await getDoc(doc(db, "resultados", "oficial"));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.poleReal) document.getElementById("admin-pole-real").value = data.poleReal;
-                    if (data.top10Real) {
-                        data.top10Real.forEach((piloto, index) => {
-                            let sel = document.getElementById(`admin-puesto-${index + 1}`);
-                            if (sel) sel.value = piloto;
-                        });
-                    }
-                }
-            } catch (e) {
-                console.error("No hay resultados previos cargados", e);
-            }
-        }
-
-        async function cargarTablaGeneral() {
-            const contenedor = document.getElementById("lista-tabla-general");
-            contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Cargando tabla de posiciones...</p>";
-            try {
-                const querySnapshot = await getDocs(collection(db, "pronosticos"));
-                if (querySnapshot.empty) {
-                    contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Aún no hay pronósticos guardados por los participantes.</p>";
-                    return;
-                }
-
-                let listaParticipantes = [];
-                querySnapshot.forEach((docSnap) => {
-                    listaParticipantes.push(docSnap.data());
-                });
-
-                // Ordenar de mayor a menor puntaje
-                listaParticipantes.sort((a, b) => (b.puntosTotal || 0) - (a.puntosTotal || 0));
-
-                let html = '<div class="space-y-3">';
-                listaParticipantes.forEach((p, index) => {
-                    let badgeColor = index === 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : (index === 1 ? 'bg-zinc-300/20 text-zinc-300 border-zinc-400/40' : (index === 2 ? 'bg-amber-700/20 text-amber-500 border-amber-700/40' : 'bg-zinc-900 text-zinc-400 border-zinc-800'));
-                    
-                    html += `
-                        <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                            <div class="flex items-center space-x-3">
-                                <span class="w-8 h-8 flex items-center justify-center font-black rounded-lg border text-xs ${badgeColor}">#${index + 1}</span>
-                                <div>
-                                    <h4 class="font-bold text-white text-sm">${p.nombreUsuario || 'Participante'}</h4>
-                                    <p class="text-[11px] text-zinc-400">Poleman apostado: <span class="text-red-500 font-semibold">${p.pole || 'No definido'}</span></p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <div class="text-xs text-zinc-300 bg-black px-3 py-1.5 rounded-lg border border-zinc-800">
-                                    Top 10 (${p.top10 ? p.top10.filter(Boolean).length : 0}/10)
-                                </div>
-                                <div class="bg-red-950/80 border border-red-800/60 px-4 py-2 rounded-xl text-center">
-                                    <span class="block text-[10px] text-red-400 uppercase font-bold">Puntaje</span>
-                                    <span class="text-base font-black text-white">${p.puntosTotal || 0} pts</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                contenedor.innerHTML = html;
-            } catch (e) {
-                contenedor.innerHTML = "<p class='text-red-500 text-sm'>Error al cargar la tabla general: " + e.message + "</p>";
-            }
-        }
-
-        window.reiniciarFormulario = function() {
-            document.getElementById("pole-select").value = "";
+        window.reiniciarTop10 = function() {
             for (let i = 1; i <= 10; i++) {
                 let sel = document.getElementById(`puesto-${i}`);
                 if (sel) sel.value = "";
             }
             actualizarContadorCompletados();
         }
-    </script>
-</body>
-</html>
+
+        function verificarLimitesTiempo() {
+            const ahora = new Date();
+            
+            // Margen de 5 minutos antes
+            const limitePole = new Date(CONFIG_FECHAS_GP.cierrePole.getTime() - 5 * 60000);
+            const limiteCarrera = new Date(CONFIG_FECHAS_GP.cierreCarrera.getTime() - 5 * 60000);
+
+            const badgePole = document.getElementById("estado-tanda-1");
+            const selectPole = document.getElementById("pole-select");
+            const btnPole = document.getElementById("btn-guardar-pole");
+
+            if (ahora >= limitePole) {
+                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgePole.textContent = "🔒 Cerrado (Tiempo Límite)"; }
+                if (selectPole) selectPole.disabled = true;
+                if (btnPole) btnPole.disabled = true;
+            } else {
+                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgePole.textContent = "🟢 Abierto para Votar / Modificar"; }
+            }
+
+            const badgeCarrera = document.getElementById("estado-tanda-2");
+            const btnTop10 = document.getElementById("btn-guardar-top10");
+            if (ahora >= limiteCarrera) {
+                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgeCarrera.textContent = "🔒 Cerrado (Tiempo Límite)"; }
+                if (btnTop10) btnTop10.disabled = true;
+            } else {
+                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgeCarrera.textContent = "🟢 Abierto para Votar / Modificar
