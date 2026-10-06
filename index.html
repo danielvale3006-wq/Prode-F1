@@ -30,7 +30,7 @@
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-                
+            
         <!-- SECCIÓN 1: MIS PRONÓSTICOS (DOBLE TANDA) -->
         <div id="seccion-pronostico" class="space-y-6">
             <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-black border border-zinc-800 p-6 rounded-2xl relative overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -122,7 +122,7 @@
                         🔄 Actualizar Tabla
                     </button>
                 </div>
-                <div id="lista-tabla-general"></div>
+                <div id="lista-tabla-general" class="overflow-x-auto"></div>
             </div>
         </div>
 
@@ -226,7 +226,7 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
         
-        // CORREO DE ADMINISTRADOR ACTUALIZADO
+        // CORREO DE ADMINISTRADOR
         const ADMIN_EMAIL = "Danielvale3006@gmail.com";
 
         const CONFIG_FECHAS_GP = {
@@ -408,7 +408,9 @@
                 if (user) {
                     authBtn.textContent = "Cerrar Sesión (" + user.displayName.split(' ')[0] + ")";
                     authBtn.onclick = () => signOut(auth).then(() => alert("Sesión cerrada"));
-                    if (user.email === ADMIN_EMAIL && navAdmin) navAdmin.classList.remove("hidden");
+                    if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && navAdmin) {
+                        navAdmin.classList.remove("hidden");
+                    }
                     cargarPronosticosUsuario(db, user.uid);
                 } else {
                     authBtn.textContent = "Iniciar Sesión con Google";
@@ -543,11 +545,17 @@
 
                         datos.top10.forEach((piloto, index) => {
                             if (!piloto) return;
-                            let realIndex = top10Real.indexOf(piloto);
-                            if (realIndex !== -1) {
-                                let diff = Math.abs(index - realIndex);
-                                puntos += matrizDiferencia[diff] || 0;
+                            let puestoPronosticadoUsuario = index + 1;
+                            let puestoRealEncontrado = top10Real.indexOf(piloto);
+
+                            if (puestoRealEncontrado !== -1) {
+                                let puestoRealPiloto = puestoRealEncontrado + 1;
+                                let diferencia = Math.abs(puestoPronosticadoUsuario - puestoRealPiloto);
+                                if (matrizDiferencia[diferencia]) {
+                                    puntos += matrizDiferencia[diferencia];
+                                }
                             }
+
                             if (index < 3 && top10Real[index] !== piloto) podioExacto = false;
                             if (index < 5 && top10Real[index] !== piloto) top5Exacto = false;
                         });
@@ -558,57 +566,63 @@
 
                     await updateDoc(doc(db, "pronosticos", docUser.id), { puntosTotal: puntos });
                 }
-                alert("¡Resultados guardados y puntos calculados con éxito!");
-            } catch (e) { alert("Error al calcular puntos: " + e.message); }
+
+                alert("¡Resultados guardados y puntos calculados exitosamente para todos los usuarios!");
+                cargarTablaGeneral();
+            } catch (e) {
+                alert("Error al calcular puntos: " + e.message);
+            }
         }
 
         window.cargarTablaGeneral = async function() {
             const contenedor = document.getElementById("lista-tabla-general");
             if (!contenedor) return;
-            contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Cargando tabla...</p>";
+            contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Cargando tabla de posiciones...</p>";
 
             try {
                 const querySnapshot = await getDocs(collection(db, "pronosticos"));
-                let usuarios = [];
-                querySnapshot.forEach(doc => usuarios.push({ id: doc.id, ...doc.data() }));
-                
-                usuarios.sort((a, b) => (b.puntosTotal || 0) - (a.puntosTotal || 0));
+                let participantes = [];
+                querySnapshot.forEach(docSnap => {
+                    participantes.push(docSnap.data());
+                });
 
-                if (usuarios.length === 0) {
-                    contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Aún no hay participantes registrados.</p>";
+                participantes.sort((a, b) => (b.puntosTotal || 0) - (a.puntosTotal || 0));
+
+                if (participantes.length === 0) {
+                    contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Aún no hay participantes registrados.</p>";
                     return;
                 }
 
                 let html = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="border-b border-zinc-800 text-zinc-400 uppercase">
-                                    <th class="p-3">Pos</th>
-                                    <th class="p-3">Participante</th>
-                                    <th class="p-3">Pole</th>
-                                    <th class="p-3 text-right">Puntos Total</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-zinc-900">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-zinc-800 text-zinc-400 uppercase text-[10px]">
+                                <th class="p-3">Pos</th>
+                                <th class="p-3">Participante</th>
+                                <th class="p-3">Pole</th>
+                                <th class="p-3 text-right">Puntos Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-900">
                 `;
 
-                usuarios.forEach((u, index) => {
-                    let posBadge = index === 0 ? 'bg-amber-500 text-black' : (index === 1 ? 'bg-zinc-300 text-black' : (index === 2 ? 'bg-amber-700 text-white' : 'bg-zinc-900 text-zinc-300'));
+                participantes.forEach((p, index) => {
+                    let pos = index + 1;
+                    let badgeColor = pos === 1 ? 'bg-yellow-500 text-black font-black' : pos === 2 ? 'bg-zinc-300 text-black font-black' : pos === 3 ? 'bg-amber-700 text-white font-black' : 'bg-zinc-900 text-zinc-400';
                     html += `
                         <tr class="hover:bg-zinc-900/50 transition">
-                            <td class="p-3 font-bold"><span class="w-6 h-6 inline-flex items-center justify-center rounded-lg ${posBadge}">${index + 1}</span></td>
-                            <td class="p-3 font-semibold text-white">${u.nombreUsuario || 'Anónimo'}</td>
-                            <td class="p-3 text-zinc-400">${u.pole ? '✅' : '❌'}</td>
-                            <td class="p-3 text-right font-black text-red-500 text-sm">${u.puntosTotal || 0} pts</td>
+                            <td class="p-3 font-bold"><span class="w-6 h-6 inline-flex items-center justify-center rounded-lg ${badgeColor}">${pos}</span></td>
+                            <td class="p-3 font-semibold text-white">${p.nombreUsuario || 'Usuario'}</td>
+                            <td class="p-3 text-zinc-300">${p.pole ? '✅' : '❌'}</td>
+                            <td class="p-3 text-right font-black text-red-500 text-sm">${p.puntosTotal || 0} pts</td>
                         </tr>
                     `;
                 });
 
-                html += `</tbody></table></div>`;
+                html += "</tbody></table>";
                 contenedor.innerHTML = html;
             } catch (e) {
-                contenedor.innerHTML = "<p class='text-xs text-red-500'>Error al cargar la tabla general.</p>";
+                contenedor.innerHTML = "<p class='text-xs text-red-500 p-4'>Error al cargar la tabla general.</p>";
             }
         }
     </script>
