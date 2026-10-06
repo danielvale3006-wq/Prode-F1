@@ -98,6 +98,18 @@
                 </div>
             </div>
 
+            <!-- ESTADO DE PARTICIPANTES QUE YA VOTARON -->
+            <div class="bg-zinc-950 border border-zinc-800 p-4 md:p-5 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-red-500 text-sm">👥</span>
+                        <h3 class="font-black text-xs uppercase tracking-wider text-zinc-200">Participantes que ya votaron en esta fecha</h3>
+                    </div>
+                    <p id="contador-participantes-votos" class="text-[11px] text-zinc-400">Cargando lista de participantes...</p>
+                </div>
+                <div id="lista-avatars-votos" class="flex flex-wrap gap-1.5 max-w-md"></div>
+            </div>
+
             <!-- TANDA 1: POLE POSITION -->
             <div class="bg-zinc-950 border border-zinc-800 p-5 md:p-6 rounded-2xl shadow-xl space-y-4">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-zinc-800 pb-4">
@@ -345,6 +357,7 @@
             configurarAutenticacion(auth, db);
             configurarNavegacion();
             verificarLimitesTiempo();
+            cargarListaParticipantesQueVotaron();
         });
 
         function inicializarTextosDinamicos() {
@@ -541,6 +554,7 @@
             // Mostrar Sección
             document.getElementById(`seccion-${n}`)?.classList.remove("hidden");
             if (n === 'tabla') cargarTablas();
+            if (n === 'pronostico') cargarListaParticipantesQueVotaron();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -564,6 +578,7 @@
                     }
 
                     await cargarPronosticosUsuario(user.uid);
+                    await cargarListaParticipantesQueVotaron();
                 } else {
                     authBtn.textContent = "Iniciar Sesión";
                     authBtn.onclick = async () => {
@@ -602,6 +617,46 @@
             }
         }
 
+        async function cargarListaParticipantesQueVotaron() {
+            const contadorEl = document.getElementById("contador-participantes-votos");
+            const avatEl = document.getElementById("lista-avatars-votos");
+            if (!contadorEl || !avatEl) return;
+
+            contadorEl.textContent = "Cargando participantes...";
+            avatEl.innerHTML = "";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "pronosticos"));
+                let votantes = [];
+
+                querySnapshot.forEach((d) => {
+                    const data = d.data();
+                    if (data.gp === ID_GP_ACTUAL) {
+                        // Verificamos si al menos guardó pole o top10
+                        if (data.pole || (data.top10 && data.top10.length > 0)) {
+                            let nombreLimpio = data.userName ? data.userName.split('@')[0] : "Participante";
+                            votantes.push(nombreLimpio);
+                        }
+                    }
+                });
+
+                if (votantes.length === 0) {
+                    contadorEl.textContent = "Aún nadie ha guardado pronósticos para este GP. ¡Sé el primero!";
+                    avatEl.innerHTML = "";
+                } else {
+                    contadorEl.textContent = `${votantes.length} ${votantes.length === 1 ? 'participante ya votó' : 'participantes ya votaron'}:`;
+                    let htmlTags = "";
+                    votantes.forEach(nombre => {
+                        htmlTags += `<span class="bg-black text-zinc-200 border border-zinc-800 text-[11px] font-bold px-3 py-1 rounded-lg flex items-center space-x-1 shadow-sm"><span>✅</span><span>${nombre}</span></span>`;
+                    });
+                    avatEl.innerHTML = htmlTags;
+                }
+            } catch (e) {
+                console.error(e);
+                contadorEl.textContent = "No se pudo cargar la lista de participantes.";
+            }
+        }
+
         window.guardarPoleFirestore = async function() {
             const user = auth.currentUser;
             if (!user) {
@@ -623,6 +678,7 @@
                     updatedAt: new Date()
                 }, { merge: true });
                 alert("¡Pronóstico de Pole guardado con éxito!");
+                cargarListaParticipantesQueVotaron();
             } catch (e) {
                 console.error(e);
                 alert("Error al guardar la Pole.");
@@ -654,6 +710,7 @@
                     updatedAt: new Date()
                 }, { merge: true });
                 alert("¡Pronóstico de Top 10 guardado con éxito!");
+                cargarListaParticipantesQueVotaron();
             } catch (e) {
                 console.error(e);
                 alert("Error al guardar el Top 10.");
