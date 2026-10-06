@@ -30,6 +30,35 @@
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- WIDGET VISUAL: GRAN PREMIO DEL FIN DE SEMANA -->
+        <section class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="flex items-center space-x-4">
+                <div id="gp-icono-bandera" class="text-4xl md:text-5xl bg-black/40 p-3.5 rounded-2xl border border-zinc-800 shadow-inner">
+                    🏁
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">Fecha Activa</span>
+                        <span class="text-zinc-400 text-xs font-semibold" id="gp-subtitulo-fecha">Temporada 2026</span>
+                    </div>
+                    <h2 id="gp-titulo-principal" class="text-xl md:text-2xl font-black uppercase tracking-tight text-white">Cargando Gran Premio...</h2>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto">
+                <div class="bg-black/60 border border-zinc-800 px-4 py-2.5 rounded-xl text-center flex-1 md:flex-none">
+                    <span class="block text-[10px] uppercase font-bold text-zinc-400">Cierre Pole (Sáb)</span>
+                    <span id="gp-info-cierre-pole" class="text-xs font-black text-red-500">--/-- --:--</span>
+                </div>
+                <div class="bg-black/60 border border-zinc-800 px-4 py-2.5 rounded-xl text-center flex-1 md:flex-none">
+                    <span class="block text-[10px] uppercase font-bold text-zinc-400">Cierre Carrera (Dom)</span>
+                    <span id="gp-info-cierre-carrera" class="text-xs font-black text-red-500">--/-- --:--</span>
+                </div>
+            </div>
+        </section>
             
         <!-- SECCIÓN 1: MIS PRONÓSTICOS (DOBLE TANDA) -->
         <div id="seccion-pronostico" class="space-y-6">
@@ -250,29 +279,25 @@
         
         const ADMIN_EMAIL = "Danielvale3006@gmail.com";
 
-        // CALENDARIO OFICIAL 2026 (El sistema selecciona automáticamente la carrera actual según el día)
+        // CALENDARIO OFICIAL 2026 CON ICONOS/BANDERAS
         const CALENDARIO_F1_2026 = [
-            { id: "GP_Singapur_2026", nombre: "GP de Singapur 🇸🇬", cierrePole: "2026-10-10T14:00:00", cierreCarrera: "2026-10-11T08:00:00" },
-            { id: "GP_EEUU_2026", nombre: "GP de Estados Unidos 🇺🇸", cierrePole: "2026-10-24T14:00:00", cierreCarrera: "2026-10-25T15:00:00" },
-            { id: "GP_Mexico_2026", nombre: "GP de México 🇲🇽", cierrePole: "2026-11-07T15:00:00", cierreCarrera: "2026-11-08T15:00:00" },
-            { id: "GP_Brasil_2026", nombre: "GP de Brasil 🇧🇷", cierrePole: "2026-11-14T11:00:00", cierreCarrera: "2026-11-15T14:00:00" },
-            { id: "GP_LasVegas_2026", nombre: "GP de Las Vegas 🎰", cierrePole: "2026-11-21T01:00:00", cierreCarrera: "2026-11-22T06:00:00" },
-            { id: "GP_Qatar_2026", nombre: "GP de Qatar 🇶🇦", cierrePole: "2026-11-28T13:00:00", cierreCarrera: "2026-11-29T13:00:00" },
-            { id: "GP_AbuDhabi_2026", nombre: "GP de Abu Dhabi 🇦🇪", cierrePole: "2026-12-05T10:00:00", cierreCarrera: "2026-12-06T10:00:00" }
+            { id: "GP_Singapur_2026", nombre: "GP de Singapur", icono: "🇸🇬", cierrePole: "2026-10-10T14:00:00", cierreCarrera: "2026-10-11T08:00:00" },
+            { id: "GP_EEUU_2026", nombre: "GP de Estados Unidos", icono: "🇺🇸", cierrePole: "2026-10-24T14:00:00", cierreCarrera: "2026-10-25T15:00:00" },
+            { id: "GP_Mexico_2026", nombre: "GP de México", icono: "🇲🇽", cierrePole: "2026-11-07T15:00:00", cierreCarrera: "2026-11-08T15:00:00" },
+            { id: "GP_Brasil_2026", nombre: "GP de Brasil", icono: "🇧🇷", cierrePole: "2026-11-14T11:00:00", cierreCarrera: "2026-11-15T14:00:00" },
+            { id: "GP_LasVegas_2026", nombre: "GP de Las Vegas", icono: "🎰", cierrePole: "2026-11-21T01:00:00", cierreCarrera: "2026-11-22T06:00:00" },
+            { id: "GP_Qatar_2026", nombre: "GP de Qatar", icono: "🇶🇦", cierrePole: "2026-11-28T13:00:00", cierreCarrera: "2026-11-29T13:00:00" },
+            { id: "GP_AbuDhabi_2026", nombre: "GP de Abu Dhabi", icono: "🇦🇪", cierrePole: "2026-12-05T10:00:00", cierreCarrera: "2026-12-06T10:00:00" }
         ];
 
-        // Función para detectar automáticamente el GP actual basado en la fecha de hoy
         function obtenerGPActual() {
             const ahora = new Date();
-            // Buscar el primer GP cuya fecha de carrera aún no haya pasado por completo (o el más cercano)
             for (let gp of CALENDARIO_F1_2026) {
                 let finCarrera = new Date(gp.cierreCarrera);
-                // Si la carrera es hoy o en el futuro (dándole un margen de 3 horas post-carrera)
                 if (ahora.getTime() < (finCarrera.getTime() + 3 * 3600000)) {
                     return gp;
                 }
             }
-            // Si pasaron todos, devuelve el último de la lista
             return CALENDARIO_F1_2026[CALENDARIO_F1_2026.length - 1];
         }
 
@@ -308,10 +333,21 @@
         });
 
         function inicializarTextosDinamicos() {
-            document.getElementById("label-gp-badge").textContent = `${GP_ACTUAL.nombre} (Próxima Fecha)`;
+            // Actualizar Widget Visual del GP
+            document.getElementById("gp-titulo-principal").textContent = `${GP_ACTUAL.nombre} ${GP_ACTUAL.icono}`;
+            document.getElementById("gp-icono-bandera").textContent = GP_ACTUAL.icono;
+            
+            // Formatear fechas de cierre para mostrarlas de forma amigable en el widget
+            const fPole = new Date(GP_ACTUAL.cierrePole);
+            const fCarrera = new Date(GP_ACTUAL.cierreCarrera);
+            document.getElementById("gp-info-cierre-pole").textContent = `${fPole.getDate()}/${fPole.getMonth()+1} - ${fPole.getHours().toString().padStart(2,'0')}:${fPole.getMinutes().toString().padStart(2,'0')} hs`;
+            document.getElementById("gp-info-cierre-carrera").textContent = `${fCarrera.getDate()}/${fCarrera.getMonth()+1} - ${fCarrera.getHours().toString().padStart(2,'0')}:${fCarrera.getMinutes().toString().padStart(2,'0')} hs`;
+
+            // Resto de textos dinámicos
+            document.getElementById("label-gp-badge").textContent = `${GP_ACTUAL.nombre} ${GP_ACTUAL.icono} (Próxima Fecha)`;
             document.getElementById("titulo-tabla-fecha").textContent = `Puntuación del ${GP_ACTUAL.nombre}`;
             document.getElementById("admin-titulo-gp").textContent = `Cargar Resultados Reales del ${GP_ACTUAL.nombre}`;
-            document.getElementById("btn-tab-fecha").textContent = `🏁 Resultados del ${GP_ACTUAL.nombre.split(' ')[1]}`;
+            document.getElementById("btn-tab-fecha").textContent = `🏁 Resultados del ${GP_ACTUAL.nombre.split(' ')[2] || GP_ACTUAL.nombre.split(' ')[1]}`;
         }
 
         function inicializarInterfaz() {
@@ -687,7 +723,7 @@
             if (!contenedor) return;
             contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Cargando...</p>";
 
-            try {
+            >try {
                 const querySnapshot = await getDocs(collection(db, "usuarios_campeonato"));
                 let lista = [];
                 querySnapshot.forEach(docSnap => lista.push(docSnap.data()));
