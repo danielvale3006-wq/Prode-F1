@@ -36,8 +36,9 @@
             <div class="absolute -right-10 -top-10 w-40 h-40 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
             
             <div class="flex items-center space-x-4">
-                <div id="gp-icono-bandera" class="text-4xl md:text-5xl bg-black/40 p-3.5 rounded-2xl border border-zinc-800 shadow-inner">
-                    🏁
+                <!-- Contenedor optimizado para evitar fallos de fuentes de banderas en Windows -->
+                <div id="gp-icono-bandera" class="w-14 h-14 md:w-16 md:h-16 bg-black/60 flex items-center justify-center rounded-2xl border border-zinc-700/80 shadow-inner text-2xl md:text-3xl font-black text-red-500">
+                    GP
                 </div>
                 <div class="space-y-1">
                     <div class="flex items-center space-x-2">
@@ -280,13 +281,13 @@
         const ADMIN_EMAIL = "Danielvale3006@gmail.com";
 
         const CALENDARIO_F1_2026 = [
-            { id: "GP_Singapur_2026", nombre: "GP de Singapur", icono: "🇸🇬", cierrePole: "2026-10-10T14:00:00", cierreCarrera: "2026-10-11T08:00:00" },
-            { id: "GP_EEUU_2026", nombre: "GP de Estados Unidos", icono: "🇺🇸", cierrePole: "2026-10-24T14:00:00", cierreCarrera: "2026-10-25T15:00:00" },
-            { id: "GP_Mexico_2026", nombre: "GP de México", icono: "🇲🇽", cierrePole: "2026-11-07T15:00:00", cierreCarrera: "2026-11-08T15:00:00" },
-            { id: "GP_Brasil_2026", nombre: "GP de Brasil", icono: "🇧🇷", cierrePole: "2026-11-14T11:00:00", cierreCarrera: "2026-11-15T14:00:00" },
-            { id: "GP_LasVegas_2026", nombre: "GP de Las Vegas", icono: "🎰", cierrePole: "2026-11-21T01:00:00", cierreCarrera: "2026-11-22T06:00:00" },
-            { id: "GP_Qatar_2026", nombre: "GP de Qatar", icono: "🇶🇦", cierrePole: "2026-11-28T13:00:00", cierreCarrera: "2026-11-29T13:00:00" },
-            { id: "GP_AbuDhabi_2026", nombre: "GP de Abu Dhabi", icono: "🇦🇪", cierrePole: "2026-12-05T10:00:00", cierreCarrera: "2026-12-06T10:00:00" }
+            { id: "GP_Singapur_2026", nombre: "GP de Singapur", codigo: "SIN", cierrePole: "2026-10-10T14:00:00", cierreCarrera: "2026-10-11T08:00:00" },
+            { id: "GP_EEUU_2026", nombre: "GP de Estados Unidos", codigo: "USA", cierrePole: "2026-10-24T14:00:00", cierreCarrera: "2026-10-25T15:00:00" },
+            { id: "GP_Mexico_2026", nombre: "GP de México", codigo: "MEX", cierrePole: "2026-11-07T15:00:00", cierreCarrera: "2026-11-08T15:00:00" },
+            { id: "GP_Brasil_2026", nombre: "GP de Brasil", codigo: "BRA", cierrePole: "2026-11-14T11:00:00", cierreCarrera: "2026-11-15T14:00:00" },
+            { id: "GP_LasVegas_2026", nombre: "GP de Las Vegas", codigo: "LV", cierrePole: "2026-11-21T01:00:00", cierreCarrera: "2026-11-22T06:00:00" },
+            { id: "GP_Qatar_2026", nombre: "GP de Qatar", codigo: "QAT", cierrePole: "2026-11-28T13:00:00", cierreCarrera: "2026-11-29T13:00:00" },
+            { id: "GP_AbuDhabi_2026", nombre: "GP de Abu Dhabi", codigo: "ABU", cierrePole: "2026-12-05T10:00:00", cierreCarrera: "2026-12-06T10:00:00" }
         ];
 
         function obtenerGPActual() {
@@ -330,15 +331,15 @@
         });
 
         function inicializarTextosDinamicos() {
-            document.getElementById("gp-titulo-principal").textContent = `${GP_ACTUAL.nombre} ${GP_ACTUAL.icono}`;
-            document.getElementById("gp-icono-bandera").textContent = GP_ACTUAL.icono;
+            document.getElementById("gp-titulo-principal").textContent = `${GP_ACTUAL.nombre}`;
+            document.getElementById("gp-icono-bandera").textContent = GP_ACTUAL.codigo;
             
             const fPole = new Date(GP_ACTUAL.cierrePole);
             const fCarrera = new Date(GP_ACTUAL.cierreCarrera);
             document.getElementById("gp-info-cierre-pole").textContent = `${fPole.getDate()}/${fPole.getMonth()+1} - ${fPole.getHours().toString().padStart(2,'0')}:${fPole.getMinutes().toString().padStart(2,'0')} hs`;
             document.getElementById("gp-info-cierre-carrera").textContent = `${fCarrera.getDate()}/${fCarrera.getMonth()+1} - ${fCarrera.getHours().toString().padStart(2,'0')}:${fCarrera.getMinutes().toString().padStart(2,'0')} hs`;
 
-            document.getElementById("label-gp-badge").textContent = `${GP_ACTUAL.nombre} ${GP_ACTUAL.icono} (Próxima Fecha)`;
+            document.getElementById("label-gp-badge").textContent = `${GP_ACTUAL.nombre} (Próxima Fecha)`;
             document.getElementById("titulo-tabla-fecha").textContent = `Puntuación del ${GP_ACTUAL.nombre}`;
             document.getElementById("admin-titulo-gp").textContent = `Cargar Resultados Reales del ${GP_ACTUAL.nombre}`;
             document.getElementById("btn-tab-fecha").textContent = `🏁 Resultados del ${GP_ACTUAL.nombre.split(' ')[2] || GP_ACTUAL.nombre.split(' ')[1]}`;
