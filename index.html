@@ -36,7 +36,6 @@
             <div class="absolute -right-10 -top-10 w-40 h-40 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
             
             <div class="flex items-center space-x-4">
-                <!-- Contenedor optimizado para mostrar la bandera -->
                 <div id="gp-icono-bandera" class="w-14 h-14 md:w-16 md:h-16 bg-black/60 flex items-center justify-center rounded-2xl border border-zinc-700/80 shadow-inner overflow-hidden">
                     <span class="text-red-500 font-black">GP</span>
                 </div>
@@ -141,7 +140,6 @@
 
         <!-- SECCIÓN 2: TABLAS DE PUNTUACIÓN (FECHA Y GENERAL) -->
         <div id="seccion-tabla" class="space-y-6 hidden">
-            <!-- PESTAÑAS DE SELECCIÓN DE TABLA -->
             <div class="flex space-x-2 border-b border-zinc-800 pb-3">
                 <button onclick="cambiarVistaTabla('fecha')" id="btn-tab-fecha" class="bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer">
                     🏁 Resultados de la Fecha
@@ -151,7 +149,6 @@
                 </button>
             </div>
 
-            <!-- TABLA 1: FIN DE SEMANA (GP ACTUAL) -->
             <div id="contenedor-tabla-fecha" class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl shadow-xl space-y-4">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                     <div>
@@ -165,7 +162,6 @@
                 <div id="lista-tabla-fecha" class="overflow-x-auto"></div>
             </div>
 
-            <!-- TABLA 2: GENERAL DEL CAMPEONATO -->
             <div id="contenedor-tabla-general" class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl shadow-xl space-y-4 hidden">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                     <div>
@@ -333,9 +329,8 @@
         function inicializarTextosDinamicos() {
             document.getElementById("gp-titulo-principal").textContent = `${GP_ACTUAL.nombre}`;
             
-            // Reemplazar texto por imagen de bandera usando FlagCDN
             const contenedorBandera = document.getElementById("gp-icono-bandera");
-            contenedorBandera.innerHTML = `<img src="https://flagcdn.com/w80/${GP_ACTUAL.codigo.toLowerCase()}.png" alt="${GP_ACTUAL.nombre}" class="w-full h-full object-cover">`;
+            contenedorBandera.innerHTML = `<img src="https://flagcdn.com/w80/${GP_ACTUAL.codigo.toLowerCase()}.png" alt="${GP_ACTUAL.nombre}" class="w-full h-full object-cover rounded-xl">`;
 
             const fPole = new Date(GP_ACTUAL.cierrePole);
             const fCarrera = new Date(GP_ACTUAL.cierreCarrera);
@@ -345,7 +340,12 @@
             document.getElementById("label-gp-badge").textContent = `${GP_ACTUAL.nombre} (Próxima Fecha)`;
             document.getElementById("titulo-tabla-fecha").textContent = `Puntuación del ${GP_ACTUAL.nombre}`;
             document.getElementById("admin-titulo-gp").textContent = `Cargar Resultados Reales del ${GP_ACTUAL.nombre}`;
-            document.getElementById("btn-tab-fecha").textContent = `🏁 Resultados del ${GP_ACTUAL.nombre.split(' ')[2] || GP_ACTUAL.nombre.split(' ')[1]}`;
+            
+            const btnTabFecha = document.getElementById("btn-tab-fecha");
+            if (btnTabFecha) {
+                const nombreCorto = GP_ACTUAL.nombre.split(' ').pop();
+                btnTabFecha.textContent = `🏁 Resultados de ${nombreCorto}`;
+            }
         }
 
         function inicializarInterfaz() {
