@@ -537,77 +537,78 @@
                     if (datos.pole && datos.pole === poleReal) puntos += 25;
 
                     if (datos.top10 && Array.isArray(datos.top10)) {
-                        let podioExacto = true, top5Exacto = true;
+                        let podioExacto = true;
+                        let top5Exacto = true;
+
                         datos.top10.forEach((piloto, index) => {
                             if (!piloto) return;
-                            let pred = index + 1;
-                            let realIdx = top10Real.indexOf(piloto);
-                            if (realIdx !== -1) {
-                                let realPos = realIdx + 1;
-                                let diff = Math.abs(pred - realPos);
-                                if (matrizDiferencia[diff] !== undefined) puntos += matrizDiferencia[diff];
-                                if (pred <= 3 && pred !== realPos) podioExacto = false;
-                                if (pred <= 5 && pred !== realPos) top5Exacto = false;
-                            } else {
-                                podioExacto = false; top5Exacto = false;
+                            let realIndex = top10Real.indexOf(piloto);
+                            if (realIndex !== -1) {
+                                let diff = Math.abs(index - realIndex);
+                                puntos += matrizDiferencia[diff] || 0;
                             }
+                            if (index < 3 && top10Real[index] !== piloto) podioExacto = false;
+                            if (index < 5 && top10Real[index] !== piloto) top5Exacto = false;
                         });
-                        if (podioExacto && datos.top10.slice(0, 3).filter(Boolean).length === 3) puntos += 25;
-                        if (top5Exacto && datos.top10.slice(0, 5).filter(Boolean).length === 5) puntos += 50;
+
+                        if (podioExacto) puntos += 25;
+                        if (top5Exacto) puntos += 50;
                     }
 
                     await updateDoc(doc(db, "pronosticos", docUser.id), { puntosTotal: puntos });
                 }
-                alert("¡Puntos calculados y actualizados para todos!");
-                cargarTablaGeneral();
-            } catch (e) { alert("Error al calcular: " + e.message); }
+                alert("¡Resultados guardados y puntos calculados con éxito!");
+            } catch (e) { alert("Error al calcular puntos: " + e.message); }
         }
 
-        async function cargarTablaGeneral() {
+        window.cargarTablaGeneral = async function() {
             const contenedor = document.getElementById("lista-tabla-general");
-            contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Cargando tabla...</p>";
+            if (!contenedor) return;
+            contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Cargando tabla...</p>";
+
             try {
                 const querySnapshot = await getDocs(collection(db, "pronosticos"));
-                if (querySnapshot.empty) { contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Aún no hay pronósticos.</p>"; return; }
+                let usuarios = [];
+                querySnapshot.forEach(doc => usuarios.push({ id: doc.id, ...doc.data() }));
                 
-                let participantes = [];
-                querySnapshot.forEach(d => participantes.push({ id: d.id, ...d.data() }));
-                participantes.sort((a, b) => (b.puntosTotal || 0) - (a.puntosTotal || 0));
+                usuarios.sort((a, b) => (b.puntosTotal || 0) - (a.puntosTotal || 0));
 
-                const currentUser = auth.currentUser;
+                if (usuarios.length === 0) {
+                    contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Aún no hay participantes registrados.</p>";
+                    return;
+                }
 
-                let html = '<div class="space-y-3">';
-                participantes.forEach((p, idx) => {
-                    let esMiFila = currentUser && currentUser.uid === p.id;
+                let html = `
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-zinc-800 text-zinc-400 uppercase">
+                                    <th class="p-3">Pos</th>
+                                    <th class="p-3">Participante</th>
+                                    <th class="p-3">Pole</th>
+                                    <th class="p-3 text-right">Puntos Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-900">
+                `;
+
+                usuarios.forEach((u, index) => {
+                    let posBadge = index === 0 ? 'bg-amber-500 text-black' : (index === 1 ? 'bg-zinc-300 text-black' : (index === 2 ? 'bg-amber-700 text-white' : 'bg-zinc-900 text-zinc-300'));
                     html += `
-                        <div class="bg-zinc-900 border ${esMiFila ? 'border-red-600/80 shadow-lg shadow-red-600/10' : 'border-zinc-800'} p-4 rounded-xl flex justify-between items-center">
-                            <div class="flex items-center space-x-3">
-                                <span class="w-8 h-8 flex items-center justify-center font-black rounded-lg border text-xs ${idx === 0 ? 'bg-yellow-500 text-black border-yellow-400' : 'border-zinc-700'}">#${idx + 1}</span>
-                                <div>
-                                    <h4 class="font-bold text-white text-sm flex items-center gap-2">
-                                        ${p.nombreUsuario || 'Participante'} 
-                                        ${esMiFila ? '<span class="bg-red-950 text-red-400 text-[10px] px-2 py-0.5 rounded border border-red-800 font-bold">Tú</span>' : ''}
-                                    </h4>
-                                    <p class="text-[11px] text-zinc-400">Pole: <span class="text-red-500 font-semibold">${p.pole || 'No definido'}</span></p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                ${esMiFila ? `
-                                    <button onclick="abrirModalMiPronostico()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
-                                        👁️ Ver mi apuesta
-                                    </button>
-                                ` : ''}
-                                <div class="bg-red-950/80 border border-red-800/60 px-4 py-2 rounded-xl text-center">
-                                    <span class="block text-[10px] text-red-400 uppercase font-bold">Puntaje</span>
-                                    <span class="text-base font-black text-white">${p.puntosTotal || 0} pts</span>
-                                </div>
-                            </div>
-                        </div>
+                        <tr class="hover:bg-zinc-900/50 transition">
+                            <td class="p-3 font-bold"><span class="w-6 h-6 inline-flex items-center justify-center rounded-lg ${posBadge}">${index + 1}</span></td>
+                            <td class="p-3 font-semibold text-white">${u.nombreUsuario || 'Anónimo'}</td>
+                            <td class="p-3 text-zinc-400">${u.pole ? '✅' : '❌'}</td>
+                            <td class="p-3 text-right font-black text-red-500 text-sm">${u.puntosTotal || 0} pts</td>
+                        </tr>
                     `;
                 });
-                html += '</div>';
+
+                html += `</tbody></table></div>`;
                 contenedor.innerHTML = html;
-            } catch (e) { contenedor.innerHTML = "<p class='text-red-500'>Error al cargar tabla.</p>"; }
+            } catch (e) {
+                contenedor.innerHTML = "<p class='text-xs text-red-500'>Error al cargar la tabla general.</p>";
+            }
         }
     </script>
 </body>
