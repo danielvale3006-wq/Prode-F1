@@ -17,7 +17,7 @@
         </div>
         <nav class="hidden md:flex space-x-6 text-xs font-semibold">
             <a href="#" id="nav-pronostico" class="text-red-500 border-b-2 border-red-600 pb-1 font-bold">Mis Pronósticos</a>
-            <a href="#" id="nav-tabla" class="text-zinc-400 hover:text-white transition pb-1">Tabla General y Puntos</a>
+            <a href="#" id="nav-tabla" class="text-zinc-400 hover:text-white transition pb-1">Tablas de Puntuación</a>
             <a href="#" id="nav-reglas" class="text-zinc-400 hover:text-white transition pb-1">Reglas y Puntuación</a>
             <a href="#" id="nav-admin" class="text-zinc-400 hover:text-white transition pb-1 hidden">Admin GP</a>
         </nav>
@@ -36,14 +36,13 @@
             <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-black border border-zinc-800 p-6 rounded-2xl relative overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div>
-                    <span class="bg-red-950 text-red-500 text-[10px] px-3 py-1 rounded-full border border-red-800/60 font-black uppercase tracking-widest">Gran Premio 2026</span>
+                    <span class="bg-red-950 text-red-500 text-[10px] px-3 py-1 rounded-full border border-red-800/60 font-black uppercase tracking-widest">Gran Premio Actual</span>
                     <h2 class="text-2xl md:text-3xl font-black mt-2 tracking-tight uppercase">Panel de Pronósticos por Tanda</h2>
                     <p class="text-zinc-400 text-xs mt-1">Vota la Pole (Sábado) y el Top 10 (Domingo). Puedes modificar tus elecciones hasta 5 min antes de cada sesión.</p>
                 </div>
-                <!-- BOTÓN PARA VER MI APUESTA GUARDADA -->
                 <div>
                     <button onclick="abrirModalMiPronostico()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg transition cursor-pointer flex items-center space-x-2">
-                        <span>👁️</span>
+                        <span>👁️️</span>
                         <span>Ver mi Pronóstico Guardado</span>
                     </button>
                 </div>
@@ -110,16 +109,41 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 2: TABLA GENERAL Y PUNTOS -->
-        <div id="seccion-tabla" class="space-y-4 hidden">
-            <div class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl shadow-xl space-y-4">
+        <!-- SECCIÓN 2: TABLAS DE PUNTUACIÓN (FECHA Y GENERAL) -->
+        <div id="seccion-tabla" class="space-y-6 hidden">
+            <!-- PESTAÑAS DE SELECCIÓN DE TABLA -->
+            <div class="flex space-x-2 border-b border-zinc-800 pb-3">
+                <button onclick="cambiarVistaTabla('fecha')" id="btn-tab-fecha" class="bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer">
+                    🏁 Resultados de este GP
+                </button>
+                <button onclick="cambiarVistaTabla('general')" id="btn-tab-general" class="bg-zinc-900 text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border border-zinc-800">
+                    🏆 Tabla General del Campeonato
+                </button>
+            </div>
+
+            <!-- TABLA 1: FIN DE SEMANA (GP ACTUAL) -->
+            <div id="contenedor-tabla-fecha" class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl shadow-xl space-y-4">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                     <div>
-                        <h2 class="text-xl font-black uppercase tracking-wider">Tabla General de Posiciones</h2>
-                        <p class="text-zinc-400 text-xs">Puntajes oficiales calculados automáticamente tras finalizar el Gran Premio.</p>
+                        <h2 class="text-xl font-black uppercase tracking-wider">Puntuación del Gran Premio Actual</h2>
+                        <p class="text-zinc-400 text-xs">Puntos obtenidos exclusivamente en esta fecha.</p>
                     </div>
-                    <button onclick="cargarTablaGeneral()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
-                        🔄 Actualizar Tabla
+                    <button onclick="cargarTablas()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
+                        🔄 Actualizar
+                    </button>
+                </div>
+                <div id="lista-tabla-fecha" class="overflow-x-auto"></div>
+            </div>
+
+            <!-- TABLA 2: GENERAL DEL CAMPEONATO -->
+            <div id="contenedor-tabla-general" class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl shadow-xl space-y-4 hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl font-black uppercase tracking-wider">Tabla General del Campeonato 2026</h2>
+                        <p class="text-zinc-400 text-xs">Suma total de puntos acumulados en toda la temporada.</p>
+                    </div>
+                    <button onclick="cargarTablas()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
+                        🔄 Actualizar
                     </button>
                 </div>
                 <div id="lista-tabla-general" class="overflow-x-auto"></div>
@@ -142,7 +166,7 @@
                         <span class="text-red-500 font-bold">🏆</span>
                         <h3 class="font-black text-sm uppercase tracking-wider">Tanda 2: Top 10 (Matriz de Diferencia)</h3>
                     </div>
-                    <p class="text-xs text-zinc-300 leading-relaxed">Acertar la posición exacta otorga 25 pts. La puntuación disminuye según la diferencia de puestos (0 dif: 25pts, 1 dif: 18pts, 2 dif: 15pts, etc.).</p>
+                    <p class="text-xs text-zinc-300 leading-relaxed">Acertar la posición exacta otorga 25 pts. La puntuación disminuye según la diferencia de puestos.</p>
                 </div>
 
                 <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl space-y-2 shadow-xl md:col-span-2">
@@ -151,7 +175,7 @@
                         <h3 class="font-black text-sm uppercase tracking-wider">Bonos Especiales</h3>
                     </div>
                     <ul class="text-xs text-zinc-300 space-y-2">
-                        <li>• <strong>Bono Podio exacto:</strong> Si le atinas exactamente a los 3 puestos del podio (1°, 2° y 3° en orden), obtienes <strong class="text-red-500">+25 pts extra</strong>.</li>
+                        <li>• <strong>Bono Podio exacto:</strong> Si le atinas exactamente a los 3 puestos del podio, obtienes <strong class="text-red-500">+25 pts extra</strong>.</li>
                         <li>• <strong>Bono Top 5 exacto:</strong> Si aciertas los 5 primeros puestos en orden perfecto, obtienes <strong class="text-red-500">+50 pts extra</strong>.</li>
                     </ul>
                 </div>
@@ -178,7 +202,7 @@
                     </div>
                     <div class="flex justify-end pt-2">
                         <button onclick="ejecutarCalculoAutomaticoPuntos()" class="bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
-                            ⚡ Guardar Resultados y Calcular Puntos Automáticamente
+                            ⚡ Guardar Resultados y Calcular Puntos
                         </button>
                     </div>
                 </div>
@@ -186,16 +210,14 @@
         </div>
     </main>
 
-    <!-- MODAL PARA VER MI PRONÓSTICO GUARDADO -->
+    <!-- MODAL PARA VER MI PRONÓSTICO -->
     <div id="modal-mi-pronostico" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-950 border border-zinc-800 w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-5 relative">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
                 <h3 class="font-black text-sm uppercase tracking-wider text-red-500">📋 Tu Pronóstico Registrado</h3>
                 <button onclick="cerrarModalMiPronostico()" class="text-zinc-400 hover:text-white font-bold text-base cursor-pointer">✕</button>
             </div>
-            <div id="contenido-mi-pronostico" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                <!-- Se llena dinámicamente con JS -->
-            </div>
+            <div id="contenido-mi-pronostico" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1"></div>
             <div class="flex justify-end pt-2 border-t border-zinc-800">
                 <button onclick="cerrarModalMiPronostico()" class="bg-zinc-900 hover:bg-zinc-800 text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer border border-zinc-700">
                     Cerrar
@@ -204,11 +226,11 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs y Lógica Global -->
+    <!-- Firebase y Lógica -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",
@@ -226,8 +248,8 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
         
-        // CORREO DE ADMINISTRADOR
         const ADMIN_EMAIL = "Danielvale3006@gmail.com";
+        const ID_GP_ACTUAL = "GP_Actual_2026"; // Puedes cambiar el nombre por cada fecha (ej. "GP_Monaco_2026")
 
         const CONFIG_FECHAS_GP = {
             cierrePole: new Date("2026-10-10T14:00:00"),
@@ -365,20 +387,20 @@
             const btnPole = document.getElementById("btn-guardar-pole");
 
             if (ahora >= limitePole) {
-                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgePole.textContent = "🔒 Cerrado (Tiempo Límite)"; }
+                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgePole.textContent = "🔒 Cerrado"; }
                 if (selectPole) selectPole.disabled = true;
                 if (btnPole) btnPole.disabled = true;
             } else {
-                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgePole.textContent = "🟢 Abierto para Votar / Modificar"; }
+                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgePole.textContent = "🟢 Abierto"; }
             }
 
             const badgeCarrera = document.getElementById("estado-tanda-2");
             const btnTop10 = document.getElementById("btn-guardar-top10");
             if (ahora >= limiteCarrera) {
-                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgeCarrera.textContent = "🔒 Cerrado (Tiempo Límite)"; }
+                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgeCarrera.textContent = "🔒 Cerrado"; }
                 if (btnTop10) btnTop10.disabled = true;
             } else {
-                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgeCarrera.textContent = "🟢 Abierto para Votar / Modificar"; }
+                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgeCarrera.textContent = "🟢 Abierto"; }
             }
         }
 
@@ -395,9 +417,28 @@
                     document.getElementById(`nav-${n}`).classList.add("text-red-500", "border-b-2", "border-red-600", "font-bold");
                     document.getElementById(`nav-${n}`).classList.remove("text-zinc-400");
                     document.getElementById(`seccion-${n}`)?.classList.remove("hidden");
-                    if (n === 'tabla') cargarTablaGeneral();
+                    if (n === 'tabla') cargarTablas();
                 });
             });
+        }
+
+        window.cambiarVistaTabla = function(tipo) {
+            const btnFecha = document.getElementById("btn-tab-fecha");
+            const btnGeneral = document.getElementById("btn-tab-general");
+            const contFecha = document.getElementById("contenedor-tabla-fecha");
+            const contGeneral = document.getElementById("contenedor-tabla-general");
+
+            if (tipo === 'fecha') {
+                btnFecha.className = "bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer";
+                btnGeneral.className = "bg-zinc-900 text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border border-zinc-800";
+                contFecha.classList.remove("hidden");
+                contGeneral.classList.add("hidden");
+            } else {
+                btnGeneral.className = "bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer";
+                btnFecha.className = "bg-zinc-900 text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border border-zinc-800";
+                contGeneral.classList.remove("hidden");
+                contFecha.classList.add("hidden");
+            }
         }
 
         function configurarAutenticacion(auth, db) {
@@ -424,16 +465,18 @@
             const user = auth.currentUser;
             if (!user) { alert("Inicia sesión primero."); return; }
             const pole = document.getElementById("pole-select").value;
-            if (!pole) { alert("Selecciona un piloto para la pole."); return; }
+            if (!pole) { alert("Selecciona un piloto."); return; }
 
             try {
-                await setDoc(doc(db, "pronosticos", user.uid), {
+                await setDoc(doc(db, "pronosticos", `${user.uid}_${ID_GP_ACTUAL}`), {
+                    uid: user.uid,
                     nombreUsuario: user.displayName,
                     email: user.email,
+                    gp: ID_GP_ACTUAL,
                     pole: pole,
                     actualizadoPole: new Date()
                 }, { merge: true });
-                alert("¡Pronóstico de Pole guardado/actualizado con éxito!");
+                alert("¡Pronóstico de Pole guardado!");
             } catch (e) { alert("Error: " + e.message); }
         }
 
@@ -444,19 +487,21 @@
             for (let i = 1; i <= 10; i++) top10.push(document.getElementById(`puesto-${i}`).value);
 
             try {
-                await setDoc(doc(db, "pronosticos", user.uid), {
+                await setDoc(doc(db, "pronosticos", `${user.uid}_${ID_GP_ACTUAL}`), {
+                    uid: user.uid,
                     nombreUsuario: user.displayName,
                     email: user.email,
+                    gp: ID_GP_ACTUAL,
                     top10: top10,
                     actualizadoTop10: new Date()
                 }, { merge: true });
-                alert("¡Pronóstico de Top 10 guardado/actualizado con éxito!");
+                alert("¡Pronóstico de Top 10 guardado!");
             } catch (e) { alert("Error: " + e.message); }
         }
 
         async function cargarPronosticosUsuario(db, uid) {
             try {
-                const docSnap = await getDoc(doc(db, "pronosticos", uid));
+                const docSnap = await getDoc(doc(db, "pronosticos", `${uid}_${ID_GP_ACTUAL}`));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data.pole) document.getElementById("pole-select").value = data.pole;
@@ -473,49 +518,36 @@
 
         window.abrirModalMiPronostico = async function() {
             const user = auth.currentUser;
-            if (!user) { alert("Inicia sesión para ver tu pronóstico."); return; }
-            
+            if (!user) { alert("Inicia sesión primero."); return; }
             const contenedor = document.getElementById("contenido-mi-pronostico");
-            contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Cargando tu pronóstico...</p>";
+            contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Cargando...</p>";
             document.getElementById("modal-mi-pronostico").classList.remove("hidden");
 
             try {
-                const docSnap = await getDoc(doc(db, "pronosticos", user.uid));
+                const docSnap = await getDoc(doc(db, "pronosticos", `${user.uid}_${ID_GP_ACTUAL}`));
                 if (!docSnap.exists()) {
-                    contenedor.innerHTML = "<p class='text-xs text-zinc-400'>Aún no has guardado ningún pronóstico en este GP.</p>";
+                    contenedor.innerHTML = "<p class='text-xs text-zinc-400'>No tienes pronósticos guardados para este GP.</p>";
                     return;
                 }
-
                 const data = docSnap.data();
                 let html = `
                     <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-1">
-                        <span class="text-[10px] uppercase font-bold text-red-500">Poleman Elegido</span>
+                        <span class="text-[10px] uppercase font-bold text-red-500">Poleman</span>
                         <p class="text-xs font-bold text-white">${data.pole || 'No definido'}</p>
                     </div>
                     <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-2">
-                        <span class="text-[10px] uppercase font-bold text-red-500">Top 10 Elegido</span>
+                        <span class="text-[10px] uppercase font-bold text-red-500">Top 10</span>
                 `;
-
-                if (data.top10 && Array.isArray(data.top10) && data.top10.length > 0) {
+                if (data.top10) {
                     html += "<div class='space-y-1.5'>";
-                    data.top10.forEach((piloto, idx) => {
-                        html += `
-                            <div class="flex items-center space-x-2 text-xs bg-black p-2 rounded-lg border border-zinc-800/80">
-                                <span class="w-5 h-5 flex items-center justify-center bg-red-600 text-white font-black rounded text-[10px]">${idx + 1}</span>
-                                <span class="text-zinc-200">${piloto || 'Vacío'}</span>
-                            </div>
-                        `;
+                    data.top10.forEach((p, idx) => {
+                        html += `<div class="flex items-center space-x-2 text-xs bg-black p-2 rounded-lg border border-zinc-800"><span class="w-5 h-5 flex items-center justify-center bg-red-600 text-white font-black rounded text-[10px]">${idx + 1}</span><span class="text-zinc-200">${p || 'Vacío'}</span></div>`;
                     });
                     html += "</div>";
-                } else {
-                    html += "<p class='text-xs text-zinc-400'>No has guardado pilotos en el Top 10.</p>";
                 }
-
                 html += "</div>";
                 contenedor.innerHTML = html;
-            } catch (e) {
-                contenedor.innerHTML = "<p class='text-xs text-red-500'>Error al cargar el pronóstico.</p>";
-            }
+            } catch (e) { contenedor.innerHTML = "<p class='text-xs text-red-500'>Error al cargar.</p>"; }
         }
 
         window.cerrarModalMiPronostico = function() {
@@ -529,15 +561,15 @@
             if (!poleReal) { alert("Selecciona el Poleman real."); return; }
 
             try {
-                await setDoc(doc(db, "resultados", "oficial"), { poleReal, top10Real, calculadoEn: new Date() });
                 const querySnapshot = await getDocs(collection(db, "pronosticos"));
                 const matrizDiferencia = { 0: 25, 1: 18, 2: 15, 3: 12, 4: 10, 5: 8, 6: 6, 7: 4, 8: 2, 9: 1 };
 
                 for (const docUser of querySnapshot.docs) {
                     let datos = docUser.data();
-                    let puntos = 0;
+                    if (datos.gp !== ID_GP_ACTUAL) continue;
 
-                    if (datos.pole && datos.pole === poleReal) puntos += 25;
+                    let puntosFecha = 0;
+                    if (datos.pole && datos.pole === poleReal) puntosFecha += 25;
 
                     if (datos.top10 && Array.isArray(datos.top10)) {
                         let podioExacto = true;
@@ -545,85 +577,105 @@
 
                         datos.top10.forEach((piloto, index) => {
                             if (!piloto) return;
-                            let puestoPronosticadoUsuario = index + 1;
+                            let puestoPronosticado = index + 1;
                             let puestoRealEncontrado = top10Real.indexOf(piloto);
 
                             if (puestoRealEncontrado !== -1) {
-                                let puestoRealPiloto = puestoRealEncontrado + 1;
-                                let diferencia = Math.abs(puestoPronosticadoUsuario - puestoRealPiloto);
-                                if (matrizDiferencia[diferencia]) {
-                                    puntos += matrizDiferencia[diferencia];
-                                }
+                                let puestoReal = puestoRealEncontrado + 1;
+                                let diff = Math.abs(puestoPronosticado - puestoReal);
+                                if (matrizDiferencia[diff]) puntosFecha += matrizDiferencia[diff];
                             }
-
                             if (index < 3 && top10Real[index] !== piloto) podioExacto = false;
                             if (index < 5 && top10Real[index] !== piloto) top5Exacto = false;
                         });
 
-                        if (podioExacto) puntos += 25;
-                        if (top5Exacto) puntos += 50;
+                        if (podioExacto) puntosFecha += 25;
+                        if (top5Exacto) puntosFecha += 50;
                     }
 
-                    await updateDoc(doc(db, "pronosticos", docUser.id), { puntosTotal: puntos });
+                    // Guardar puntos en el documento del GP
+                    await updateDoc(doc(db, "pronosticos", docUser.id), { puntosFecha: puntosFecha });
+
+                    // Acumular puntos en el perfil general del usuario
+                    const userRef = doc(db, "usuarios_campeonato", datos.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (!userSnap.exists()) {
+                        await setDoc(userRef, { nombreUsuario: datos.nombreUsuario, email: datos.email, puntosTotales: puntosFecha });
+                    } else {
+                        // Restar los puntos viejos de esta fecha si ya se habían calculado y sumar los nuevos (evita duplicar)
+                        let puntosAnteriores = userSnap.data().puntosTotales || 0;
+                        let puntosFechaViejos = datos.puntosFecha || 0;
+                        let nuevoTotal = (puntosAnteriores - puntosFechaViejos) + puntosFecha;
+                        await updateDoc(userRef, { puntosTotales: nuevoTotal });
+                    }
                 }
 
-                alert("¡Resultados guardados y puntos calculados exitosamente para todos los usuarios!");
-                cargarTablaGeneral();
-            } catch (e) {
-                alert("Error al calcular puntos: " + e.message);
-            }
+                alert("¡Puntos calculados con éxito para la fecha y el campeonato general!");
+                cargarTablas();
+            } catch (e) { alert("Error: " + e.message); }
         }
 
-        window.cargarTablaGeneral = async function() {
-            const contenedor = document.getElementById("lista-tabla-general");
+        window.cargarTablas = async function() {
+            await cargarTablaFechaActual();
+            await cargarTablaCampeonatoGeneral();
+        }
+
+        async function cargarTablaFechaActual() {
+            const contenedor = document.getElementById("lista-tabla-fecha");
             if (!contenedor) return;
-            contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Cargando tabla de posiciones...</p>";
+            contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Cargando...</p>";
 
             try {
                 const querySnapshot = await getDocs(collection(db, "pronosticos"));
-                let participantes = [];
+                let lista = [];
                 querySnapshot.forEach(docSnap => {
-                    participantes.push(docSnap.data());
+                    let d = docSnap.data();
+                    if (d.gp === ID_GP_ACTUAL) lista.push(d);
                 });
 
-                participantes.sort((a, b) => (b.puntosTotal || 0) - (a.puntosTotal || 0));
+                lista.sort((a, b) => (b.puntosFecha || 0) - (a.puntosFecha || 0));
 
-                if (participantes.length === 0) {
-                    contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Aún no hay participantes registrados.</p>";
+                if (lista.length === 0) {
+                    contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>No hay pronósticos computados para esta fecha.</p>";
                     return;
                 }
 
-                let html = `
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead>
-                            <tr class="border-b border-zinc-800 text-zinc-400 uppercase text-[10px]">
-                                <th class="p-3">Pos</th>
-                                <th class="p-3">Participante</th>
-                                <th class="p-3">Pole</th>
-                                <th class="p-3 text-right">Puntos Totales</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-zinc-900">
-                `;
-
-                participantes.forEach((p, index) => {
+                let html = `<table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b border-zinc-800 text-zinc-400 uppercase text-[10px]"><th class="p-3">Pos</th><th class="p-3">Participante</th><th class="p-3 text-right">Puntos GP</th></tr></thead><tbody class="divide-y divide-zinc-900">`;
+                lista.forEach((p, index) => {
                     let pos = index + 1;
-                    let badgeColor = pos === 1 ? 'bg-yellow-500 text-black font-black' : pos === 2 ? 'bg-zinc-300 text-black font-black' : pos === 3 ? 'bg-amber-700 text-white font-black' : 'bg-zinc-900 text-zinc-400';
-                    html += `
-                        <tr class="hover:bg-zinc-900/50 transition">
-                            <td class="p-3 font-bold"><span class="w-6 h-6 inline-flex items-center justify-center rounded-lg ${badgeColor}">${pos}</span></td>
-                            <td class="p-3 font-semibold text-white">${p.nombreUsuario || 'Usuario'}</td>
-                            <td class="p-3 text-zinc-300">${p.pole ? '✅' : '❌'}</td>
-                            <td class="p-3 text-right font-black text-red-500 text-sm">${p.puntosTotal || 0} pts</td>
-                        </tr>
-                    `;
+                    html += `<tr class="hover:bg-zinc-900/50 transition"><td class="p-3 font-bold"><span class="w-6 h-6 inline-flex items-center justify-center rounded-lg bg-zinc-900 text-zinc-300">${pos}</span></td><td class="p-3 font-semibold text-white">${p.nombreUsuario}</td><td class="p-3 text-right font-black text-red-500 text-sm">${p.puntosFecha || 0} pts</td></tr>`;
                 });
-
                 html += "</tbody></table>";
                 contenedor.innerHTML = html;
-            } catch (e) {
-                contenedor.innerHTML = "<p class='text-xs text-red-500 p-4'>Error al cargar la tabla general.</p>";
-            }
+            } catch (e) { contenedor.innerHTML = "<p class='text-xs text-red-500 p-4'>Error al cargar.</p>"; }
+        }
+
+        async function cargarTablaCampeonatoGeneral() {
+            const contenedor = document.getElementById("lista-tabla-general");
+            if (!contenedor) return;
+            contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Cargando...</p>";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "usuarios_campeonato"));
+                let lista = [];
+                querySnapshot.forEach(docSnap => lista.push(docSnap.data()));
+
+                lista.sort((a, b) => (b.puntosTotales || 0) - (a.puntosTotales || 0));
+
+                if (lista.length === 0) {
+                    contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Aún no hay puntos registrados en el campeonato general.</p>";
+                    return;
+                }
+
+                let html = `<table class="w-full text-left border-collapse text-xs"><thead><tr class="border-b border-zinc-800 text-zinc-400 uppercase text-[10px]"><th class="p-3">Pos</th><th class="p-3">Participante</th><th class="p-3 text-right">Puntos Totales (Campeonato)</th></tr></thead><tbody class="divide-y divide-zinc-900">`;
+                lista.forEach((p, index) => {
+                    let pos = index + 1;
+                    let badgeColor = pos === 1 ? 'bg-yellow-500 text-black font-black' : pos === 2 ? 'bg-zinc-300 text-black font-black' : pos === 3 ? 'bg-amber-700 text-white font-black' : 'bg-zinc-900 text-zinc-400';
+                    html += `<tr class="hover:bg-zinc-900/50 transition"><td class="p-3 font-bold"><span class="w-6 h-6 inline-flex items-center justify-center rounded-lg ${badgeColor}">${pos}</span></td><td class="p-3 font-semibold text-white">${p.nombreUsuario}</td><td class="p-3 text-right font-black text-red-500 text-sm">${p.puntosTotales || 0} pts</td></tr>`;
+                });
+                html += "</tbody></table>";
+                contenedor.innerHTML = html;
+            } catch (e) { contenedor.innerHTML = "<p class='text-xs text-red-500 p-4'>Error al cargar.</p>"; }
         }
     </script>
 </body>
