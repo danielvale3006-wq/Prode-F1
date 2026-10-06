@@ -22,9 +22,10 @@
             <a href="#" id="nav-reglas" class="text-zinc-400 hover:text-white transition pb-1">Reglas y Puntuación</a>
             <a href="#" id="nav-admin" class="text-zinc-400 hover:text-white transition pb-1 hidden">Admin GP</a>
         </nav>
-        <div>
-            <button id="auth-btn" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/30 cursor-pointer">
-                Cargando...
+        <div class="flex items-center space-x-3">
+            <span id="usuario-conectado-tag" class="hidden text-xs text-zinc-300 font-bold bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800"></span>
+            <button id="auth-btn" onclick="abrirModalAuth()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/30 cursor-pointer">
+                Iniciar Sesión
             </button>
         </div>
     </header>
@@ -128,7 +129,7 @@
                         </select>
                     </div>
                     <div class="flex md:justify-end">
-                        <button id="btn-guardar-pole" onclick="guardarPoleFirestore()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
+                        <button id="btn-guardar-pole" onclick="guardarPoleLocal()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
                             Guardar Pronóstico de Pole
                         </button>
                     </div>
@@ -162,7 +163,7 @@
                         </div>
                         <div id="top-10-container" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
                         <div class="flex justify-end pt-2">
-                            <button id="btn-guardar-top10" onclick="guardarTop10Firestore()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
+                            <button id="btn-guardar-top10" onclick="guardarTop10Local()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
                                 Guardar Pronóstico de Top 10
                             </button>
                         </div>
@@ -269,6 +270,29 @@
         </div>
     </main>
 
+    <!-- MODAL PARA INICIAR SESIÓN / REGISTRO SIMPLE -->
+    <div id="modal-auth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-950 border border-zinc-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-5 relative">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="font-black text-sm uppercase tracking-wider text-red-500">👤 Identificación de Usuario</h3>
+                <button onclick="cerrarModalAuth()" class="text-zinc-400 hover:text-white font-bold text-base cursor-pointer">✕</button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] uppercase font-bold text-zinc-400 mb-1">Nombre de Usuario</label>
+                    <input type="text" id="input-username" placeholder="Ej. CarlosF1" class="w-full bg-black text-white border border-zinc-700 rounded-xl p-3 text-xs focus:outline-none focus:border-red-600">
+                </div>
+                <div>
+                    <label class="block text-[11px] uppercase font-bold text-zinc-400 mb-1">Contraseña</label>
+                    <input type="password" id="input-password" placeholder="••••••••" class="w-full bg-black text-white border border-zinc-700 rounded-xl p-3 text-xs focus:outline-none focus:border-red-600">
+                </div>
+                <button onclick="realizarLoginOSignup()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 transition cursor-pointer mt-2">
+                    Ingresar / Registrarse
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL PARA VER MI PRONÓSTICO -->
     <div id="modal-mi-pronostico" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-950 border border-zinc-800 w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-5 relative">
@@ -285,29 +309,9 @@
         </div>
     </div>
 
-    <!-- Firebase y Lógica -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",
-            authDomain: "prode-24c51.firebaseapp.com",
-            databaseURL: "https://prode-24c51-default-rtdb.firebaseio.com",
-            projectId: "prode-24c51",
-            storageBucket: "prode-24c51.firebasestorage.app",
-            messagingSenderId: "886164589723",
-            appId: "1:886164589723:web:34ce1bfb7c5ac88fc14a3e",
-            measurementId: "G-8KMWYK30R5"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const googleProvider = new GoogleAuthProvider();
-        
-        const ADMIN_EMAIL = "Danielvale3006@gmail.com";
+    <!-- Lógica Local Simple (Sin Firebase Auth, ideal para GitHub Pages) -->
+    <script>
+        const ADMIN_USER = "daniel"; // Puedes cambiar aquí el usuario admin si deseas
 
         const CALENDARIO_F1_2026 = [
             { id: "GP_Singapur_2026", nombre: "GP de Singapur", codigo: "sg", cierrePole: "2026-10-10T14:00:00", cierreCarrera: "2026-10-11T08:00:00" },
@@ -351,13 +355,16 @@
             "Sergio Pérez #11 (Cadillac)", "Valtteri Bottas #77 (Cadillac)"
         ];
 
+        let usuarioActual = localStorage.getItem("prode_usuario_actual") || null;
+
         document.addEventListener("DOMContentLoaded", () => {
             inicializarTextosDinamicos();
             inicializarInterfaz();
-            configurarAutenticacion(auth, db);
             configurarNavegacion();
             verificarLimitesTiempo();
+            actualizarEstadoSesionUI();
             cargarListaParticipantesQueVotaron();
+            cargarTablas();
         });
 
         function inicializarTextosDinamicos() {
@@ -490,466 +497,448 @@
             const btnPole = document.getElementById("btn-guardar-pole");
 
             if (ahora >= limitePole) {
-                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgePole.textContent = "🔒 Cerrado"; }
+                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-500 border-red-800"; badgePole.textContent = "Cerrado"; }
                 if (selectPole) selectPole.disabled = true;
                 if (btnPole) btnPole.disabled = true;
             } else {
-                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgePole.textContent = "🟢 Abierto"; }
+                if (badgePole) { badgePole.className = "text-xs font-bold px-3 py-1 rounded-full border bg-emerald-950 text-emerald-500 border-emerald-800"; badgePole.textContent = "Abierto"; }
             }
 
-            const badgeCarrera = document.getElementById("estado-tanda-2");
+            const badgeTop10 = document.getElementById("estado-tanda-2");
             const btnTop10 = document.getElementById("btn-guardar-top10");
             if (ahora >= limiteCarrera) {
-                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-400 border-red-800"; badgeCarrera.textContent = "🔒 Cerrado"; }
+                if (badgeTop10) { badgeTop10.className = "text-xs font-bold px-3 py-1 rounded-full border bg-red-950 text-red-500 border-red-800"; badgeTop10.textContent = "Cerrado"; }
+                for (let i = 1; i <= 10; i++) {
+                    let s = document.getElementById(`puesto-${i}`);
+                    if (s) s.disabled = true;
+                }
                 if (btnTop10) btnTop10.disabled = true;
             } else {
-                if (badgeCarrera) { badgeCarrera.className = "text-xs font-bold px-3 py-1 rounded-full border bg-green-950 text-green-400 border-green-800"; badgeCarrera.textContent = "🟢 Abierto"; }
+                if (badgeTop10) { badgeTop10.className = "text-xs font-bold px-3 py-1 rounded-full border bg-emerald-950 text-emerald-500 border-emerald-800"; badgeTop10.textContent = "Abierto"; }
             }
         }
 
-        function configurarNavegacion() {
-            const navs = ['pronostico', 'tabla', 'reglas', 'admin'];
-            navs.forEach(n => {
-                document.getElementById(`nav-${n}`)?.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    activarSeccion(n);
-                });
-            });
+        // Sistema de autenticación simple por localStorage
+        window.abrirModalAuth = function() {
+            document.getElementById("modal-auth").classList.remove("hidden");
+        }
+        window.cerrarModalAuth = function() {
+            document.getElementById("modal-auth").classList.add("hidden");
         }
 
-        window.cambiarSeccionMovil = function(n) {
-            activarSeccion(n);
-        }
+        window.realizarLoginOSignup = function() {
+            const user = document.getElementById("input-username").value.trim();
+            const pass = document.getElementById("input-password").value.trim();
 
-        function activarSeccion(n) {
-            const navs = ['pronostico', 'tabla', 'reglas', 'admin'];
-            navs.forEach(other => {
-                // Escritorio
-                document.getElementById(`nav-${other}`)?.classList.remove("text-red-500", "border-b-2", "border-red-600", "font-bold");
-                document.getElementById(`nav-${other}`)?.classList.add("text-zinc-400");
-                // Móvil
-                const btnM = document.getElementById(`nav-m-${other}`);
-                if (btnM) {
-                    btnM.classList.remove("text-red-500");
-                    btnM.classList.add("text-zinc-400");
-                }
-                // Secciones
-                document.getElementById(`seccion-${other}`)?.classList.add("hidden");
-            });
-
-            // Activar Escritorio
-            const navEsc = document.getElementById(`nav-${n}`);
-            if (navEsc) {
-                navEsc.classList.add("text-red-500", "border-b-2", "border-red-600", "font-bold");
-                navEsc.classList.remove("text-zinc-400");
+            if (!user || !pass) {
+                alert("Por favor ingresa un nombre de usuario y una contraseña.");
+                return;
             }
 
-            // Activar Móvil
-            const navMov = document.getElementById(`nav-m-${n}`);
-            if (navMov) {
-                navMov.classList.add("text-red-500");
-                navMov.classList.remove("text-zinc-400");
+            usuarioActual = user;
+            localStorage.setItem("prode_usuario_actual", user);
+            
+            // Guardar credenciales simples en localStorage si no existen
+            let usuariosDB = JSON.parse(localStorage.getItem("prode_usuarios_db") || "{}");
+            if (!usuariosDB[user]) {
+                usuariosDB[user] = pass;
+                localStorage.setItem("prode_usuarios_db", JSON.stringify(usuariosDB));
             }
 
-            // Mostrar Sección
-            document.getElementById(`seccion-${n}`)?.classList.remove("hidden");
-            if (n === 'tabla') cargarTablas();
-            if (n === 'pronostico') cargarListaParticipantesQueVotaron();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            cerrarModalAuth();
+            actualizarEstadoSesionUI();
+            cargarPronosticosGuardados();
+            cargarListaParticipantesQueVotaron();
+            alert(`¡Bienvenido, ${user}! Sesión iniciada correctamente.`);
         }
 
-        function configurarAutenticacion(authInstance, dbInstance) {
-            const authBtn = document.getElementById("auth-btn");
+        function actualizarEstadoSesionUI() {
+            const btnAuth = document.getElementById("auth-btn");
+            const tagUser = document.getElementById("usuario-conectado-tag");
             const navAdmin = document.getElementById("nav-admin");
             const navMAdmin = document.getElementById("nav-m-admin");
 
-            onAuthStateChanged(authInstance, async (user) => {
-                if (user) {
-                    authBtn.textContent = `Salir (${user.displayName || user.email.split('@')[0]})`;
-                    authBtn.onclick = () => signOut(authInstance);
+            if (usuarioActual) {
+                btnAuth.textContent = "Cerrar Sesión";
+                btnAuth.onclick = cerrarSesion;
+                tagUser.textContent = `👤 ${usuarioActual}`;
+                tagUser.classList.remove("hidden");
 
-                    if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                        navAdmin?.classList.remove("hidden");
-                        navMAdmin?.classList.remove("hidden");
-                        await cargarResultadosAdmin();
-                    } else {
-                        navAdmin?.classList.add("hidden");
-                        navMAdmin?.classList.add("hidden");
-                    }
-
-                    await cargarPronosticosUsuario(user.uid);
-                    await cargarListaParticipantesQueVotaron();
+                if (usuarioActual.toLowerCase() === ADMIN_USER.toLowerCase()) {
+                    navAdmin?.classList.remove("hidden");
+                    navMAdmin?.classList.remove("hidden");
                 } else {
-                    authBtn.textContent = "Iniciar Sesión";
-                    authBtn.onclick = async () => {
-                        try {
-                            await signInWithPopup(authInstance, googleProvider);
-                        } catch (error) {
-                            console.error("Error al iniciar sesión:", error);
-                        }
-                    };
                     navAdmin?.classList.add("hidden");
                     navMAdmin?.classList.add("hidden");
                 }
-            });
-        }
-
-        async function cargarPronosticosUsuario(userId) {
-            try {
-                const docRef = doc(db, "pronosticos", `${ID_GP_ACTUAL}_${userId}`);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.pole) {
-                        const poleSelect = document.getElementById("pole-select");
-                        if (poleSelect) poleSelect.value = data.pole;
-                    }
-                    if (data.top10 && Array.isArray(data.top10)) {
-                        data.top10.forEach((piloto, index) => {
-                            const sel = document.getElementById(`puesto-${index + 1}`);
-                            if (sel) sel.value = piloto;
-                        });
-                        actualizarContadorCompletados();
-                    }
-                }
-            } catch (e) {
-                console.error("Error al cargar pronóstico:", e);
+                cargarPronosticosGuardados();
+            } else {
+                btnAuth.textContent = "Iniciar Sesión";
+                btnAuth.onclick = abrirModalAuth;
+                tagUser.classList.add("hidden");
+                navAdmin?.classList.add("hidden");
+                navMAdmin?.classList.add("hidden");
             }
         }
 
-        async function cargarListaParticipantesQueVotaron() {
-            const contadorEl = document.getElementById("contador-participantes-votos");
-            const avatEl = document.getElementById("lista-avatars-votos");
-            if (!contadorEl || !avatEl) return;
-
-            contadorEl.textContent = "Cargando participantes...";
-            avatEl.innerHTML = "";
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "pronosticos"));
-                let votantes = [];
-
-                querySnapshot.forEach((d) => {
-                    const data = d.data();
-                    if (data.gp === ID_GP_ACTUAL) {
-                        // Verificamos si al menos guardó pole o top10
-                        if (data.pole || (data.top10 && data.top10.length > 0)) {
-                            let nombreLimpio = data.userName ? data.userName.split('@')[0] : "Participante";
-                            votantes.push(nombreLimpio);
-                        }
-                    }
-                });
-
-                if (votantes.length === 0) {
-                    contadorEl.textContent = "Aún nadie ha guardado pronósticos para este GP. ¡Sé el primero!";
-                    avatEl.innerHTML = "";
-                } else {
-                    contadorEl.textContent = `${votantes.length} ${votantes.length === 1 ? 'participante ya votó' : 'participantes ya votaron'}:`;
-                    let htmlTags = "";
-                    votantes.forEach(nombre => {
-                        htmlTags += `<span class="bg-black text-zinc-200 border border-zinc-800 text-[11px] font-bold px-3 py-1 rounded-lg flex items-center space-x-1 shadow-sm"><span>✅</span><span>${nombre}</span></span>`;
-                    });
-                    avatEl.innerHTML = htmlTags;
-                }
-            } catch (e) {
-                console.error(e);
-                contadorEl.textContent = "No se pudo cargar la lista de participantes.";
-            }
+        function cerrarSesion() {
+            usuarioActual = null;
+            localStorage.removeItem("prode_usuario_actual");
+            actualizarEstadoSesionUI();
+            window.location.reload();
         }
 
-        window.guardarPoleFirestore = async function() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("Debes iniciar sesión para guardar tu pronóstico.");
+        // Guardar pronósticos localmente
+        window.guardarPoleLocal = function() {
+            if (!usuarioActual) {
+                alert("Debes iniciar sesión con tu nombre de usuario para guardar.");
+                abrirModalAuth();
                 return;
             }
-            const pole = document.getElementById("pole-select").value;
-            if (!pole) {
-                alert("Selecciona un piloto para la Pole.");
+            const poleVal = document.getElementById("pole-select").value;
+            if (!poleVal) {
+                alert("Selecciona un piloto para la pole.");
                 return;
             }
-            try {
-                const docRef = doc(db, "pronosticos", `${ID_GP_ACTUAL}_${user.uid}`);
-                await setDoc(docRef, {
-                    userId: user.uid,
-                    userName: user.displayName || user.email,
-                    pole: pole,
-                    gp: ID_GP_ACTUAL,
-                    updatedAt: new Date()
-                }, { merge: true });
-                alert("¡Pronóstico de Pole guardado con éxito!");
-                cargarListaParticipantesQueVotaron();
-            } catch (e) {
-                console.error(e);
-                alert("Error al guardar la Pole.");
-            }
+
+            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
+            if (!pronosticos[ID_GP_ACTUAL]) pronosticos[ID_GP_ACTUAL] = {};
+            if (!pronosticos[ID_GP_ACTUAL][usuarioActual]) pronosticos[ID_GP_ACTUAL][usuarioActual] = {};
+
+            pronosticos[ID_GP_ACTUAL][usuarioActual].pole = poleVal;
+            localStorage.setItem("prode_pronosticos", JSON.stringify(pronosticos));
+            
+            alert("¡Pronóstico de Pole guardado con éxito!");
+            cargarListaParticipantesQueVotaron();
         }
 
-        window.guardarTop10Firestore = async function() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("Debes iniciar sesión para guardar tu pronóstico.");
+        window.guardarTop10Local = function() {
+            if (!usuarioActual) {
+                alert("Debes iniciar sesión con tu nombre de usuario para guardar.");
+                abrirModalAuth();
                 return;
             }
-            let top10 = [];
+
+            let top10Arr = [];
             for (let i = 1; i <= 10; i++) {
                 let val = document.getElementById(`puesto-${i}`).value;
                 if (!val) {
-                    alert(`Debes completar los 10 puestos del Top 10 (Falta el puesto ${i}).`);
+                    alert(`Debes completar los 10 puestos (falta el puesto ${i}).`);
                     return;
                 }
-                top10.push(val);
+                top10Arr.push(val);
             }
-            try {
-                const docRef = doc(db, "pronosticos", `${ID_GP_ACTUAL}_${user.uid}`);
-                await setDoc(docRef, {
-                    userId: user.uid,
-                    userName: user.displayName || user.email,
-                    top10: top10,
-                    gp: ID_GP_ACTUAL,
-                    updatedAt: new Date()
-                }, { merge: true });
-                alert("¡Pronóstico de Top 10 guardado con éxito!");
-                cargarListaParticipantesQueVotaron();
-            } catch (e) {
-                console.error(e);
-                alert("Error al guardar el Top 10.");
+
+            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
+            if (!pronosticos[ID_GP_ACTUAL]) pronosticos[ID_GP_ACTUAL] = {};
+            if (!pronosticos[ID_GP_ACTUAL][usuarioActual]) pronosticos[ID_GP_ACTUAL][usuarioActual] = {};
+
+            pronosticos[ID_GP_ACTUAL][usuarioActual].top10 = top10Arr;
+            localStorage.setItem("prode_pronosticos", JSON.stringify(pronosticos));
+
+            alert("¡Pronóstico de Top 10 guardado con éxito!");
+            cargarListaParticipantesQueVotaron();
+        }
+
+        function cargarPronosticosGuardados() {
+            if (!usuarioActual) return;
+            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
+            if (pronosticos[ID_GP_ACTUAL] && pronosticos[ID_GP_ACTUAL][usuarioActual]) {
+                const userPron = pronosticos[ID_GP_ACTUAL][usuarioActual];
+                if (userPron.pole) {
+                    const sel = document.getElementById("pole-select");
+                    if (sel) sel.value = userPron.pole;
+                }
+                if (userPron.top10 && Array.isArray(userPron.top10)) {
+                    userPron.top10.forEach((piloto, index) => {
+                        let sel = document.getElementById(`puesto-${index + 1}`);
+                        if (sel) sel.value = piloto;
+                    });
+                    actualizarContadorCompletados();
+                }
             }
         }
 
-        window.abrirModalMiPronostico = async function() {
-            const user = auth.currentUser;
-            const modal = document.getElementById("modal-mi-pronostico");
-            const contenido = document.getElementById("contenido-mi-pronostico");
-            
-            if (!user) {
+        window.abrirModalMiPronostico = function() {
+            if (!usuarioActual) {
                 alert("Inicia sesión para ver tu pronóstico.");
+                abrirModalAuth();
                 return;
             }
+            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
+            let userPron = pronosticos[ID_GP_ACTUAL]?.[usuarioActual];
 
-            modal.classList.remove("hidden");
-            contenido.innerHTML = "<p class='text-xs text-zinc-400'>Cargando pronóstico...</p>";
-
-            try {
-                const docRef = doc(db, "pronosticos", `${ID_GP_ACTUAL}_${user.uid}`);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    let html = `<div class='space-y-2'><p class='text-xs font-bold text-red-500'>Pole Position:</p><p class='text-xs bg-zinc-900 p-2 rounded-lg border border-zinc-800'>${data.pole || 'No asignada'}</p></div>`;
-                    html += `<div class='space-y-2 mt-4'><p class='text-xs font-bold text-red-500'>Top 10 de Carrera:</p><ul class='space-y-1'>`;
-                    if (data.top10) {
-                        data.top10.forEach((p, idx) => {
-                            html += `<li class='text-xs bg-zinc-900 p-2 rounded-lg border border-zinc-800 flex justify-between'><span>Puesto ${idx + 1}</span><span class='font-bold'>${p}</span></li>`;
-                        });
-                    }
-                    html += `</ul></div>`;
-                    contenido.innerHTML = html;
-                } else {
-                    contenido.innerHTML = "<p class='text-xs text-zinc-400'>Aún no has guardado pronósticos para este Gran Premio.</p>";
+            let html = "";
+            if (!userPron || (!userPron.pole && !userPron.top10)) {
+                html = `<p class="text-xs text-zinc-400">No tienes pronósticos guardados para este Gran Premio.</p>`;
+            } else {
+                if (userPron.pole) {
+                    html += `<div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-1">
+                        <span class="text-[10px] uppercase font-bold text-red-500">Pole Position</span>
+                        <p class="text-xs font-bold text-white">${userPron.pole}</p>
+                    </div>`;
                 }
-            } catch (e) {
-                contenido.innerHTML = "<p class='text-xs text-red-500'>Error al cargar el pronóstico.</p>";
+                if (userPron.top10) {
+                    html += `<div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-2">
+                        <span class="text-[10px] uppercase font-bold text-red-500">Top 10 de Carrera</span>
+                        <ul class="space-y-1">`;
+                    userPron.top10.forEach((p, idx) => {
+                        html += `<li class="text-xs text-zinc-200 flex justify-between border-b border-zinc-800/50 pb-1">
+                            <span class="font-bold text-red-500">#${idx+1}</span>
+                            <span class="truncate ml-2">${p}</span>
+                        </li>`;
+                    });
+                    html += `</ul></div>`;
+                }
             }
+            document.getElementById("contenido-mi-pronostico").innerHTML = html;
+            document.getElementById("modal-mi-pronostico").classList.remove("hidden");
         }
 
         window.cerrarModalMiPronostico = function() {
             document.getElementById("modal-mi-pronostico").classList.add("hidden");
         }
 
-        window.ejecutarCalculoAutomaticoPuntos = async function() {
-            const user = auth.currentUser;
-            if (!user || user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-                alert("Acceso no autorizado.");
+        function cargarListaParticipantesQueVotaron() {
+            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
+            let gpVotos = pronosticos[ID_GP_ACTUAL] || {};
+            let usuariosQueVotaron = Object.keys(gpVotos);
+
+            const contadorEl = document.getElementById("contador-participantes-votos");
+            const avatarsEl = document.getElementById("lista-avatars-votos");
+
+            if (contadorEl) contadorEl.textContent = `${usuariosQueVotaron.length} participantes han registrado sus votos.`;
+            if (avatarsEl) {
+                avatarsEl.innerHTML = "";
+                if (usuariosQueVotaron.length === 0) {
+                    avatarsEl.innerHTML = `<span class="text-[11px] text-zinc-500 italic">Nadie ha votado todavía. ¡Sé el primero!</span>`;
+                } else {
+                    usuariosQueVotaron.forEach(u => {
+                        let badge = document.createElement("span");
+                        badge.className = "bg-zinc-900 text-zinc-300 border border-zinc-700 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase";
+                        badge.textContent = u;
+                        avatarsEl.appendChild(badge);
+                    });
+                }
+            }
+        }
+
+        // Panel de Admin y cálculo de puntos automático local
+        window.ejecutarCalculoAutomaticoPuntos = function() {
+            if (!usuarioActual || usuarioActual.toLowerCase() !== ADMIN_USER.toLowerCase()) {
+                alert("No tienes permisos de administrador.");
                 return;
             }
 
-            const poleReal = document.getElementById("admin-pole-real").value;
+            let poleReal = document.getElementById("admin-pole-real").value;
             let top10Real = [];
             for (let i = 1; i <= 10; i++) {
                 let val = document.getElementById(`admin-puesto-${i}`).value;
                 if (!val) {
-                    alert(`Falta completar el puesto real ${i} para calcular los puntos.`);
+                    alert(`Falta definir el puesto real ${i} en el panel de admin.`);
                     return;
                 }
                 top10Real.push(val);
             }
 
-            try {
-                await setDoc(doc(db, "resultados_oficiales", ID_GP_ACTUAL), {
-                    pole: poleReal,
-                    top10: top10Real,
-                    actualizadoEn: new Date()
-                });
+            // Guardar resultados reales
+            let resultadosReales = JSON.parse(localStorage.getItem("prode_resultados_reales") || "{}");
+            resultadosReales[ID_GP_ACTUAL] = { pole: poleReal, top10: top10Real };
+            localStorage.setItem("prode_resultados_reales", JSON.stringify(resultadosReales));
 
-                const querySnapshot = await getDocs(collection(db, "pronosticos"));
-                
-                for (let dSnap of querySnapshot.docs) {
-                    const datos = dSnap.data();
-                    if (datos.gp !== ID_GP_ACTUAL) continue;
+            // Calcular puntos de cada usuario
+            let pronosticos = JSON.parse(localStorage.getItem("prode_pronosticos") || "{}");
+            let gpVotos = pronosticos[ID_GP_ACTUAL] || {};
+            let puntuacionesFecha = {};
 
-                    let puntosPole = (datos.pole === poleReal) ? 25 : 0;
-                    let puntosTop10 = 0;
-                    let aciertosPodioExacto = true;
+            for (let user in gpVotos) {
+                let pts = 0;
+                let pron = gpVotos[user];
+
+                // Puntos Pole (+25)
+                if (pron.pole && pron.pole === poleReal) {
+                    pts += 25;
+                }
+
+                // Puntos Top 10
+                if (pron.top10 && Array.isArray(pron.top10)) {
+                    let aciertosPodioExacto = 0;
                     let aciertosTop5Exacto = true;
 
-                    if (datos.top10 && Array.isArray(datos.top10)) {
-                        datos.top10.forEach((pilotoPronosticado, idx) => {
-                            const puestoRealIndex = top10Real.indexOf(pilotoPronosticado);
-                            if (puestoRealIndex !== -1) {
-                                let dif = Math.abs(idx - puestoRealIndex);
-                                if (dif === 0) puntosTop10 += 25;
-                                else if (dif === 1) puntosTop10 += 18;
-                                else if (dif === 2) puntosTop10 += 15;
-                                else if (dif === 3) puntosTop10 += 12;
-                                else if (dif === 4) puntosTop10 += 10;
-                                else if (dif === 5) puntosTop10 += 8;
-                                else if (dif === 6) puntosTop10 += 6;
-                                else if (dif === 7) puntosTop10 += 4;
-                                else if (dif === 8) puntosTop10 += 2;
-                                else if (dif === 9) puntosTop10 += 1;
+                    pron.top10.forEach((pilotoPron, idx) => {
+                        let puestoPron = idx + 1;
+                        let puestoRealEncontrado = top10Real.indexOf(pilotoPron);
+
+                        if (puestoRealEncontrado !== -1) {
+                            let puestoReal = puestoRealEncontrado + 1;
+                            let diferencia = Math.abs(puestoPron - puestoReal);
+
+                            if (diferencia === 0) {
+                                pts += 25; // Puesto exacto
+                                if (puestoPron <= 3) aciertosPodioExacto++;
+                            } else if (diferencia === 1) {
+                                pts += 15;
+                                aciertosTop5Exacto = false;
+                            } else if (diferencia === 2) {
+                                pts += 10;
+                                aciertosTop5Exacto = false;
+                            } else if (diferencia <= 4) {
+                                pts += 5;
+                                aciertosTop5Exacto = false;
                             }
+                        } else {
+                            aciertosTop5Exacto = false;
+                        }
+                    });
 
-                            if (idx < 3 && pilotoPronosticado !== top10Real[idx]) aciertosPodioExacto = false;
-                            if (idx < 5 && pilotoPronosticado !== top10Real[idx]) aciertosTop5Exacto = false;
-                        });
-                    }
-
-                    let bonoPodio = (aciertosPodioExacto && datos.top10) ? 25 : 0;
-                    let bonoTop5 = (aciertosTop5Exacto && datos.top10) ? 50 : 0;
-                    let totalPuntosFecha = puntosPole + puntosTop10 + bonoPodio + bonoTop5;
-
-                    await setDoc(doc(db, "puntuaciones", `${ID_GP_ACTUAL}_${datos.userId}`), {
-                        userId: datos.userId,
-                        userName: datos.userName || "Participante",
-                        gp: ID_GP_ACTUAL,
-                        puntosPole,
-                        puntosTop10,
-                        bonoPodio,
-                        bonoTop5,
-                        totalPuntosFecha
-                    }, { merge: true });
+                    // Bonos
+                    if (aciertosPodioExacto === 3) pts += 25;
+                    if (aciertosTop5Exacto && pron.top10.length >= 5) pts += 50;
                 }
 
-                alert("¡Resultados guardados y puntos calculados con éxito para todos los participantes!");
-                cargarTablas();
-            } catch (e) {
-                console.error(e);
-                alert("Error al calcular los puntos.");
+                puntuacionesFecha[user] = pts;
             }
+
+            let puntosFechasDB = JSON.parse(localStorage.getItem("prode_puntos_fechas") || "{}");
+            puntosFechasDB[ID_GP_ACTUAL] = puntuacionesFecha;
+            localStorage.setItem("prode_puntos_fechas", JSON.stringify(puntosFechasDB));
+
+            // Actualizar Tabla General
+            actualizarTablaGeneralAcumulada();
+
+            alert("¡Resultados guardados y puntos calculados con éxito!");
+            cargarTablas();
         }
 
-        async function cargarResultadosAdmin() {
-            try {
-                const docSnap = await getDoc(doc(db, "resultados_oficiales", ID_GP_ACTUAL));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.pole) document.getElementById("admin-pole-real").value = data.pole;
-                    if (data.top10) {
-                        data.top10.forEach((p, idx) => {
-                            const sel = document.getElementById(`admin-puesto-${idx + 1}`);
-                            if (sel) sel.value = p;
-                        });
-                    }
+        function actualizarTablaGeneralAcumulada() {
+            let puntosFechasDB = JSON.parse(localStorage.getItem("prode_puntos_fechas") || "{}");
+            let general = {};
+
+            for (let gpId in puntosFechasDB) {
+                let fechaUsers = puntosFechasDB[gpId];
+                for (let user in fechaUsers) {
+                    if (!general[user]) general[user] = 0;
+                    general[user] += fechaUsers[user];
                 }
-            } catch (e) {
-                console.error("Error cargando resultados admin:", e);
             }
+            localStorage.setItem("prode_tabla_general", JSON.stringify(general));
         }
 
-        window.cargarTablas = async function() {
-            const contFecha = document.getElementById("lista-tabla-fecha");
-            const contGeneral = document.getElementById("lista-tabla-general");
-            
-            contFecha.innerHTML = "<p class='text-xs text-zinc-400'>Calculando y cargando resultados de la fecha...</p>";
-            contGeneral.innerHTML = "<p class='text-xs text-zinc-400'>Cargando tabla general...</p>";
+        function cargarTablas() {
+            // Tabla Fecha
+            let puntosFechasDB = JSON.parse(localStorage.getItem("prode_puntos_fechas") || "{}");
+            let fechaUsers = puntosFechasDB[ID_GP_ACTUAL] || {};
+            let listaFechaHTML = document.getElementById("lista-tabla-fecha");
 
-            try {
-                const querySnapshot = await getDocs(collection(db, "puntuaciones"));
-                let resultadosFecha = [];
-                let acumuladoGeneral = {};
-
-                querySnapshot.forEach((d) => {
-                    const data = d.data();
-                    if (data.gp === ID_GP_ACTUAL) {
-                        resultadosFecha.push(data);
-                    }
-
-                    if (!acumuladoGeneral[data.userId]) {
-                        acumuladoGeneral[data.userId] = { userName: data.userName, total: 0 };
-                    }
-                    acumuladoGeneral[data.userId].total += (data.totalPuntosFecha || 0);
+            let arrayFecha = Object.entries(fechaUsers).sort((a, b) => b[1] - a[1]);
+            if (arrayFecha.length === 0) {
+                listaFechaHTML.innerHTML = `<p class="text-xs text-zinc-400 italic p-2">Aún no hay puntuaciones calculadas para esta fecha.</p>`;
+            } else {
+                let html = `<table class="w-full text-left text-xs"><thead class="border-b border-zinc-800 text-zinc-400"><tr><th class="p-2">Pos</th><th class="p-2">Participante</th><th class="p-2 text-right">Puntos Fecha</th></tr></thead><tbody>`;
+                arrayFecha.forEach(([user, pts], index) => {
+                    html += `<tr class="border-b border-zinc-900"><td class="p-2 font-bold text-red-500">#${index+1}</td><td class="p-2 font-bold text-white">${user}</td><td class="p-2 text-right font-black text-red-500">${pts} pts</td></tr>`;
                 });
+                html += `</tbody></table>`;
+                listaFechaHTML.innerHTML = html;
+            }
 
-                resultadosFecha.sort((a, b) => b.totalPuntosFecha - a.totalPuntosFecha);
-                let listaGeneralArr = Object.values(acumuladoGeneral).sort((a, b) => b.total - a.total);
+            // Tabla General
+            let generalDB = JSON.parse(localStorage.getItem("prode_tabla_general") || "{}");
+            let listaGeneralHTML = document.getElementById("lista-tabla-general");
+            let arrayGeneral = Object.entries(generalDB).sort((a, b) => b[1] - a[1]);
 
-                if (resultadosFecha.length === 0) {
-                    contFecha.innerHTML = "<p class='text-xs text-zinc-400'>Aún no hay puntuaciones calculadas para esta fecha (el administrador debe cargar los resultados reales).</p>";
-                } else {
-                    let htmlF = `<table class='w-full text-left text-xs whitespace-nowrap'>
-                        <thead class='bg-zinc-900 text-zinc-400 uppercase text-[10px]'>
-                            <tr>
-                                <th class='p-3'>Pos</th>
-                                <th class='p-3'>Participante</th>
-                                <th class='p-3 text-center'>Pole</th>
-                                <th class='p-3 text-center'>Top 10</th>
-                                <th class='p-3 text-center'>Bonos</th>
-                                <th class='p-3 text-right'>Total Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody class='divide-y divide-zinc-800'>`;
-                    resultadosFecha.forEach((item, index) => {
-                        let bonosTotal = (item.bonoPodio || 0) + (item.bonoTop5 || 0);
-                        htmlF += `<tr class='hover:bg-zinc-900/50'>
-                            <td class='p-3 font-black'>#${index + 1}</td>
-                            <td class='p-3 font-bold text-white'>${item.userName}</td>
-                            <td class='p-3 text-center text-zinc-300'>+${item.puntosPole || 0}</td>
-                            <td class='p-3 text-center text-zinc-300'>+${item.puntosTop10 || 0}</td>
-                            <td class='p-3 text-center text-red-500 font-bold'>+${bonosTotal}</td>
-                            <td class='p-3 text-right font-black text-white'>${item.totalPuntosFecha || 0} pts</td>
-                        </tr>`;
-                    });
-                    htmlF += `</tbody></table>`;
-                    contFecha.innerHTML = htmlF;
-                }
-
-                if (listaGeneralArr.length === 0) {
-                    contGeneral.innerHTML = "<p class='text-xs text-zinc-400'>Aún hay registros en la tabla general del campeonato.</p>";
-                } else {
-                    let htmlG = `<table class='w-full text-left text-xs whitespace-nowrap'>
-                        <thead class='bg-zinc-900 text-zinc-400 uppercase text-[10px]'>
-                            <tr>
-                                <th class='p-3'>Pos</th>
-                                <th class='p-3'>Participante</th>
-                                <th class='p-3 text-right'>Puntos Totales</th>
-                            </tr>
-                        </thead>
-                        <tbody class='divide-y divide-zinc-800'>`;
-                    listaGeneralArr.forEach((item, index) => {
-                        htmlG += `<tr class='hover:bg-zinc-900/50'>
-                            <td class='p-3 font-black'>#${index + 1}</td>
-                            <td class='p-3 font-bold text-white'>${item.userName}</td>
-                            <td class='p-3 text-right font-black text-red-500 text-sm'>${item.total} pts</td>
-                        </tr>`;
-                    });
-                    htmlG += `</tbody></table>`;
-                    contGeneral.innerHTML = htmlG;
-                }
-
-            } catch (e) {
-                console.error(e);
-                contFecha.innerHTML = "<p class='text-xs text-red-500'>Error al cargar los datos de la tabla.</p>";
-                contGeneral.innerHTML = "<p class='text-xs text-red-500'>Error al cargar los datos de la tabla.</p>";
+            if (arrayGeneral.length === 0) {
+                listaGeneralHTML.innerHTML = `<p class="text-xs text-zinc-400 italic p-2">Aún no hay puntos acumulados en la temporada.</p>`;
+            } else {
+                let html = `<table class="w-full text-left text-xs"><thead class="border-b border-zinc-800 text-zinc-400"><tr><th class="p-2">Pos</th><th class="p-2">Participante</th><th class="p-2 text-right">Puntos Totales</th></tr></thead><tbody>`;
+                arrayGeneral.forEach(([user, pts], index) => {
+                    html += `<tr class="border-b border-zinc-900"><td class="p-2 font-bold text-red-500">#${index+1}</td><td class="p-2 font-bold text-white">${user}</td><td class="p-2 text-right font-black text-red-500">${pts} pts</td></tr>`;
+                });
+                html += `</tbody></table>`;
+                listaGeneralHTML.innerHTML = html;
             }
         }
 
-        window.cambiarVistaTabla = function(tipo) {
+        // Navegación de pestañas
+        function configurarNavegacion() {
+            const navPronostico = document.getElementById("nav-pronostico");
+            const navTabla = document.getElementById("nav-tabla");
+            const navReglas = document.getElementById("nav-reglas");
+            const navAdmin = document.getElementById("nav-admin");
+
+            const seccionPronostico = document.getElementById("seccion-pronostico");
+            const seccionTabla = document.getElementById("seccion-tabla");
+            const seccionReglas = document.getElementById("seccion-reglas");
+            const seccionAdmin = document.getElementById("seccion-admin");
+
+            function ocultarTodo() {
+                seccionPronostico?.classList.add("hidden");
+                seccionTabla?.classList.add("hidden");
+                seccionReglas?.classList.add("hidden");
+                seccionAdmin?.classList.add("hidden");
+
+                [navPronostico, navTabla, navReglas, navAdmin].forEach(el => {
+                    if (el) {
+                        el.className = "text-zinc-400 hover:text-white transition pb-1 font-semibold";
+                    }
+                });
+            }
+
+            navPronostico?.addEventListener("click", (e) => {
+                e.preventDefault();
+                ocultarTodo();
+                seccionPronostico.classList.remove("hidden");
+                navPronostico.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+            });
+
+            navTabla?.addEventListener("click", (e) => {
+                e.preventDefault();
+                ocultarTodo();
+                seccionTabla.classList.remove("hidden");
+                navTabla.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                cargarTablas();
+            });
+
+            navReglas?.addEventListener("click", (e) => {
+                e.preventDefault();
+                ocultarTodo();
+                seccionReglas.classList.remove("hidden");
+                navReglas.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+            });
+
+            navAdmin?.addEventListener("click", (e) => {
+                e.preventDefault();
+                ocultarTodo();
+                seccionAdmin.classList.remove("hidden");
+                navAdmin.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+            });
+        }
+
+        window.cambiarSeccionMovil = function(seccion) {
+            document.getElementById("seccion-pronostico")?.classList.add("hidden");
+            document.getElementById("seccion-tabla")?.classList.add("hidden");
+            document.getElementById("seccion-reglas")?.classList.add("hidden");
+            document.getElementById("seccion-admin")?.classList.add("hidden");
+
+            ['pronostico', 'tabla', 'reglas', 'admin'].forEach(s => {
+                let btn = document.getElementById(`nav-m-${s}`);
+                if (btn) btn.className = "flex flex-col items-center text-zinc-400 hover:text-white space-y-0.5 cursor-pointer flex-1";
+            });
+
+            document.getElementById(`seccion-${seccion}`)?.classList.remove("hidden");
+            let activeBtn = document.getElementById(`nav-m-${seccion}`);
+            if (activeBtn) activeBtn.className = "flex flex-col items-center text-red-500 space-y-0.5 cursor-pointer flex-1";
+            
+            if (seccion === 'tabla') cargarTablas();
+        }
+
+        window.cambiarVistaTabla = function(vista) {
             const btnFecha = document.getElementById("btn-tab-fecha");
             const btnGeneral = document.getElementById("btn-tab-general");
             const contFecha = document.getElementById("contenedor-tabla-fecha");
             const contGeneral = document.getElementById("contenedor-tabla-general");
 
-            if (tipo === 'fecha') {
+            if (vista === 'fecha') {
                 btnFecha.className = "bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer shrink-0";
                 btnGeneral.className = "bg-zinc-900 text-zinc-400 hover:text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border border-zinc-800 shrink-0";
                 contFecha.classList.remove("hidden");
