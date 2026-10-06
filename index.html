@@ -134,17 +134,25 @@
                         <span class="text-red-500 font-bold">🏁</span>
                         <h3 class="font-black text-sm uppercase tracking-wider">Tanda 1: Poleman (25 Puntos)</h3>
                     </div>
-                    <p class="text-xs text-zinc-300 leading-relaxed">Vota la Pole el sábado. Cierra 5 minutos antes de la clasificación.</p>
+                    <p class="text-xs text-zinc-300 leading-relaxed">Vota la Pole el sábado. Cierra 5 minutos antes de la clasificación oficial.</p>
                 </div>
 
                 <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl space-y-2 shadow-xl">
                     <div class="flex items-center space-x-2">
                         <span class="text-red-500 font-bold">🏆</span>
+                        <h3 class="font-black text-sm uppercase tracking-wider">Tanda 2: Top 10 (Matriz de Diferencia)</h3>
+                    </div>
+                    <p class="text-xs text-zinc-300 leading-relaxed">Acertar la posición exacta otorga 25 pts. La puntuación disminuye según la diferencia de puestos (0 dif: 25pts, 1 dif: 18pts, 2 dif: 15pts, etc.).</p>
+                </div>
+
+                <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl space-y-2 shadow-xl md:col-span-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-red-500 font-bold">⭐</span>
                         <h3 class="font-black text-sm uppercase tracking-wider">Bonos Especiales</h3>
                     </div>
                     <ul class="text-xs text-zinc-300 space-y-2">
-                        <li>• <strong>Bono Podio exacto:</strong> <strong class="text-red-500">+25 pts extra</strong></li>
-                        <li>• <strong>Bono Top 5 exacto:</strong> <strong class="text-red-500">+50 pts extra</strong></li>
+                        <li>• <strong>Bono Podio exacto:</strong> Si le atinas exactamente a los 3 puestos del podio (1°, 2° y 3° en orden), obtienes <strong class="text-red-500">+25 pts extra</strong>.</li>
+                        <li>• <strong>Bono Top 5 exacto:</strong> Si aciertas los 5 primeros puestos en orden perfecto, obtienes <strong class="text-red-500">+50 pts extra</strong>.</li>
                     </ul>
                 </div>
             </div>
@@ -592,7 +600,7 @@
                                 <div class="bg-red-950/80 border border-red-800/60 px-4 py-2 rounded-xl text-center">
                                     <span class="block text-[10px] text-red-400 uppercase font-bold">Puntaje</span>
                                     <span class="text-base font-black text-white">${p.puntosTotal || 0} pts</span>
-                                }}
+                                </div>
                             </div>
                         </div>
                     `;
