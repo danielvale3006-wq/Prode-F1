@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="es"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>PRODE F1 SEASON 2026</title>    <!-- Tailwind CSS -->    <script src="https://cdn.tailwindcss.com"></script>    <!-- Firebase SDKs y Lógica Global -->    <script type="module">        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";        import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+        const firebaseConfig = {            apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",            authDomain: "prode-24c51.firebaseapp.com",            databaseURL: "https://prode-24c51-default-rtdb.firebaseio.com",            projectId: "prode-24c51",            storageBucket: "prode-24c51.firebasestorage.app",            messagingSenderId: "886164589723",            appId: "1:886164589723:web:34ce1bfb7c5ac88fc14a3e",            measurementId: "G-8KMWYK30R5"        };
+
+        const app = initializeApp(firebaseConfig);        const auth = getAuth(app);        const db = getFirestore(app);        const googleProvider = new GoogleAuthProvider();
+
+        const pilotos2026 = [            "Lando Norris #1 (McLaren)",            "Oscar Piastri #81 (McLaren)",            "George Russell #63 (Mercedes)",            "Kimi Antonelli #12 (Mercedes)",            "Charles Leclerc #16 (Ferrari)",            "Lewis Hamilton #44 (Ferrari)",            "Max Verstappen #3 (Red Bull Racing)",            "Isack Hadjar #6 (Red Bull Racing)",            "Fernando Alonso #14 (Aston Martin)",            "Lance Stroll #18 (Aston Martin)",            "Pierre Gasly #10 (Alpine)",            "Franco Colapinto #43 (Alpine)",            "Alexander Albon #23 (Williams)",            "Carlos Sainz #55 (Williams)",            "Liam Lawson #30 (Racing Bulls)",            "Arvid Lindblad #41 (Racing Bulls)",            "Esteban Ocon #31 (Haas F1 Team)",            "Oliver Bearman #87 (Haas F1 Team)",            "Nico Hülkenberg #27 (Audi)",            "Gabriel Bortoleto #5 (Audi)",            "Sergio Pérez #11 (Cadillac)",            "Valtteri Bottas #77 (Cadillac)"        ];
+
+        document.addEventListener("DOMContentLoaded", () => {            inicializarInterfaz();            configurarAutenticacion(auth, db);            configurarNavegacion();        });
+
+        function inicializarInterfaz() {            const poleSelect = document.getElementById("pole-select");            const top10Container = document.getElementById("top-10-container");            const buscarPilotoInput = document.getElementById("buscar-piloto");
+
+            if (poleSelect) {                poleSelect.innerHTML = '<option value="">-- Selecciona el Poleman --</option>';                pilotos2026.forEach(piloto => {                    let opt = document.createElement("option");                    opt.value = piloto;                    opt.textContent = piloto;                    poleSelect.appendChild(opt);                });            }
+
+            if (top10Container) {                top10Container.innerHTML = "";                for (let i = 1; i <= 10; i++) {                    let div = document.createElement("div");                    div.className = "flex items-center space-x-2 bg-[#18181b] p-2 rounded-lg border border-zinc-800";                                        let optionsHtml = '<option value="">-- Puesto ' + i + ' --</option>';                    pilotos2026.forEach(p => {                        optionsHtml += '<option value="' + p + '">' + p + '</option>';                    });
+
+                    div.innerHTML = `                        <span class="w-6 h-6 flex items-center justify-center bg-red-600 text-white font-bold rounded text-xs">${i < 10 ? '0' + i : i}</span>                        <select id="puesto-${i}" onchange="actualizarContadorCompletados()" class="w-full bg-zinc-900 text-white border border-zinc-700 rounded p-1.5 text-xs focus:outline-none focus:border-red-500">                            ${optionsHtml}                        </select>                    `;                    top10Container.appendChild(div);                }            }
+
+            renderizarParrilla(pilotos2026);
+
+            if (buscarPilotoInput) {                buscarPilotoInput.addEventListener("input", (e) => {                    const texto = e.target.value.toLowerCase();                    const filtrados = pilotos2026.filter(p => p.toLowerCase().includes(texto));                    renderizarParrilla(filtrados);                });            }        }
+
+        function renderizarParrilla(listaPilotos) {            const parrillaContainer = document.getElementById("parrilla-container");            if (!parrillaContainer) return;                        parrillaContainer.innerHTML = "";            listaPilotos.forEach(piloto => {                let btn = document.createElement("button");                btn.type = "button";                btn.className = "text-left text-[11px] bg-zinc-900 hover:bg-red-950/40 text-zinc-300 hover:text-white p-2 rounded border border-zinc-800 hover:border-red-800/50 transition truncate";                btn.textContent = piloto;                btn.onclick = () => asignarSiguientePuesto(piloto);                parrillaContainer.appendChild(btn);            });        }
+
+        window.asignarSiguientePuesto = function(piloto) {            for (let i = 1; i <= 10; i++) {                let select = document.getElementById(`puesto-${i}`);                if (select && !select.value) {                    select.value = piloto;                    actualizarContadorCompletados();                    break;                }            }        }
+
+        window.actualizarContadorCompletados = function() {            let completados = 0;            for (let i = 1; i <= 10; i++) {                let select = document.getElementById(`puesto-${i}`);                if (select && select.value) completados++;            }            const contadorEl = document.getElementById("contador-completados");            if (contadorEl) contadorEl.textContent = `${completados} / 10 completados`;        }
+
+        function configurarNavegacion() {            const navPronostico = document.getElementById("nav-pronostico");            const navTabla = document.getElementById("nav-tabla");            const navReglas = document.getElementById("nav-reglas");
+
+            const seccionPronostico = document.getElementById("seccion-pronostico");            const seccionTabla = document.getElementById("seccion-tabla");            const seccionReglas = document.getElementById("seccion-reglas");
+
+            function cambiarVista(activa) {                [navPronostico, navTabla, navReglas].forEach(el => el.className = "text-zinc-400 hover:text-white transition pb-1");                [seccionPronostico, seccionTabla, seccionReglas].forEach(el => el.classList.add("hidden"));
+
+                if (activa === 'pronostico') {                    navPronostico.className = "text-red-500 border-b-2 border-red-500 pb-1 font-semibold";                    seccionPronostico.classList.remove("hidden");                } else if (activa === 'tabla') {                    navTabla.className = "text-red-500 border-b-2 border-red-500 pb-1 font-semibold";                    seccionTabla.classList.remove("hidden");                    cargarTablaGeneral();                } else if (activa === 'reglas') {                    navReglas.className = "text-red-500 border-b-2 border-red-500 pb-1 font-semibold";                    seccionReglas.classList.remove("hidden");                }            }
+
+            navPronostico.onclick = (e) => { e.preventDefault(); cambiarVista('pronostico'); };            navTabla.onclick = (e) => { e.preventDefault(); cambiarVista('tabla'); };            navReglas.onclick = (e) => { e.preventDefault(); cambiarVista('reglas'); };        }
+
+        function configurarAutenticacion(auth, db) {            const authBtn = document.getElementById("auth-btn");
+
+            onAuthStateChanged(auth, (user) => {                if (user) {                    authBtn.textContent = "Cerrar Sesión (" + user.displayName.split(' ')[0] + ")";                    authBtn.onclick = () => {                        signOut(auth).then(() => alert("Sesión cerrada"));                    };                    cargarPronostico(db, user.uid);                } else {                    authBtn.textContent = "Iniciar Sesión con Google";                    authBtn.onclick = () => {                        signInWithPopup(auth, googleProvider)                        .then((result) => {                            alert("¡Bienvenido, " + result.user.displayName + "!");                        })                        .catch((error) => {                            alert("Error al iniciar sesión con Google: " + error.message);                        });                    };                }            });        }
+
+        window.guardarPronosticoFirestore = async function() {            const user = auth.currentUser;            if (!user) {                alert("Debes iniciar sesión con Google para guardar el pronóstico.");                return;            }
+
+            const poleEl = document.getElementById("pole-select");
+            const pole = poleEl ? poleEl.value : "";
+            
+            const top10 = [];
+            for (let i = 1; i <= 10; i++) {
+                let selectPuesto = document.getElementById(`puesto-${i}`);
+                top10.push(selectPuesto ? selectPuesto.value : "");
+            }
+
+            try {
+                console.log("Intentando guardar pronóstico para:", user.uid);
+                await setDoc(doc(db, "pronosticos", user.uid), {
+                    nombreUsuario: user.displayName || "Anónimo",
+                    email: user.email || "",
+                    pole: pole,
+                    top10: top10,
+                    actualizado: new Date()
+                }, { merge: true });
+                
+                alert("¡Pronóstico guardado exitosamente en Firestore!");
+            } catch (e) {
+                console.error("Error detallado al guardar:", e);
+                alert("Error al guardar: " + e.message);
+            }
+        }
+
+        async function cargarPronostico(db, uid) {            try {                const docSnap = await getDoc(doc(db, "pronosticos", uid));                if (docSnap.exists()) {                    const data = docSnap.data();                    if (data.pole) document.getElementById("pole-select").value = data.pole;                    if (data.top10) {                        data.top10.forEach((piloto, index) => {                            let sel = document.getElementById(`puesto-${index + 1}`);                            if (sel) sel.value = piloto;                        });                        actualizarContadorCompletados();                    }                }            } catch (e) {                console.error("Error cargando pronóstico previo", e);            }        }
+
+        async function cargarTablaGeneral() {            const contenedor = document.getElementById("lista-tabla-general");            contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Cargando pronósticos de la comunidad...</p>";            try {                const querySnapshot = await getDocs(collection(db, "pronosticos"));                if (querySnapshot.empty) {                    contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Aún no hay pronósticos guardados por los usuarios.</p>";                    return;                }                let html = '<div class="space-y-3">';                querySnapshot.forEach((docSnap) => {                    const p = docSnap.data();                    html += `                        <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-2">                            <div>                                <h4 class="font-bold text-white text-base">${p.nombreUsuario || 'Participante'}</h4>                                <p class="text-xs text-zinc-400">Poleman: <span class="text-red-400 font-semibold">${p.pole || 'No definido'}</span></p>                            </div>                            <div class="text-xs text-zinc-400 bg-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-700">                                Top 10 registrado (${p.top10 ? p.top10.filter(Boolean).length : 0}/10 pilotos)                            </div>                        </div>                    `;                });                html += '</div>';                contenedor.innerHTML = html;            } catch (e) {                contenedor.innerHTML = "<p class='text-red-500 text-sm'>Error al cargar la tabla general: " + e.message + "</p>";            }        }
+
+        window.reiniciarFormulario = function() {            document.getElementById("pole-select").value = "";            for (let i = 1; i <= 10; i++) {                let sel = document.getElementById(`puesto-${i}`);                if (sel) sel.value = "";
