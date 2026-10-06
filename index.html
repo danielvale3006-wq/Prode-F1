@@ -333,17 +333,14 @@
         });
 
         function inicializarTextosDinamicos() {
-            // Actualizar Widget Visual del GP
             document.getElementById("gp-titulo-principal").textContent = `${GP_ACTUAL.nombre} ${GP_ACTUAL.icono}`;
             document.getElementById("gp-icono-bandera").textContent = GP_ACTUAL.icono;
             
-            // Formatear fechas de cierre para mostrarlas de forma amigable en el widget
             const fPole = new Date(GP_ACTUAL.cierrePole);
             const fCarrera = new Date(GP_ACTUAL.cierreCarrera);
             document.getElementById("gp-info-cierre-pole").textContent = `${fPole.getDate()}/${fPole.getMonth()+1} - ${fPole.getHours().toString().padStart(2,'0')}:${fPole.getMinutes().toString().padStart(2,'0')} hs`;
             document.getElementById("gp-info-cierre-carrera").textContent = `${fCarrera.getDate()}/${fCarrera.getMonth()+1} - ${fCarrera.getHours().toString().padStart(2,'0')}:${fCarrera.getMinutes().toString().padStart(2,'0')} hs`;
 
-            // Resto de textos dinámicos
             document.getElementById("label-gp-badge").textContent = `${GP_ACTUAL.nombre} ${GP_ACTUAL.icono} (Próxima Fecha)`;
             document.getElementById("titulo-tabla-fecha").textContent = `Puntuación del ${GP_ACTUAL.nombre}`;
             document.getElementById("admin-titulo-gp").textContent = `Cargar Resultados Reales del ${GP_ACTUAL.nombre}`;
@@ -723,7 +720,7 @@
             if (!contenedor) return;
             contenedor.innerHTML = "<p class='text-xs text-zinc-400 p-4'>Cargando...</p>";
 
-            >try {
+            try {
                 const querySnapshot = await getDocs(collection(db, "usuarios_campeonato"));
                 let lista = [];
                 querySnapshot.forEach(docSnap => lista.push(docSnap.data()));
