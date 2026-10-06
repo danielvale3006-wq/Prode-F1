@@ -6,6 +6,26 @@
     <title>PRODE F1 - TEMPORADA 2026</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, getDocs, collection, updateField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",
+            authDomain: "prode-24c51.firebaseapp.com",
+            databaseURL: "https://prode-24c51-default-rtdb.firebaseio.com",
+            projectId: "prode-24c51",
+            storageBucket: "prode-24c51.appspot.com",
+            messagingSenderId: "886164589723",
+            appId: "1:886164589723:web:34ce1bfb7c5ac88fc14a3e",
+            measurementId: "G-8KMWYK30R5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db;
+    </script>
 </head>
 <body class="bg-black text-white font-sans min-h-screen selection:bg-red-600 selection:text-white pb-20 md:pb-0">
 
@@ -129,7 +149,7 @@
                         </select>
                     </div>
                     <div class="flex md:justify-end">
-                        <button id="btn-guardar-pole" onclick="guardarPoleLocal()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
+                        <button id="btn-guardar-pole" onclick="guardarPoleFirebase()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
                             Guardar Pronóstico de Pole
                         </button>
                     </div>
@@ -163,7 +183,7 @@
                         </div>
                         <div id="top-10-container" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
                         <div class="flex justify-end pt-2">
-                            <button id="btn-guardar-top10" onclick="guardarTop10Local()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
+                            <button id="btn-guardar-top10" onclick="guardarTop10Firebase()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
                                 Guardar Pronóstico de Top 10
                             </button>
                         </div>
@@ -189,7 +209,7 @@
                         <h2 id="titulo-tabla-fecha" class="text-xl font-black uppercase tracking-wider">Puntuación del Gran Premio</h2>
                         <p class="text-zinc-400 text-xs">Puntos obtenidos exclusivamente en esta fecha.</p>
                     </div>
-                    <button onclick="cargarTablas()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
+                    <button onclick="cargarTablasFirebase()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
                         🔄 Actualizar
                     </button>
                 </div>
@@ -202,7 +222,7 @@
                         <h2 class="text-xl font-black uppercase tracking-wider">Tabla General del Campeonato 2026</h2>
                         <p class="text-zinc-400 text-xs">Suma total de puntos acumulados en toda la temporada.</p>
                     </div>
-                    <button onclick="cargarTablas()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
+                    <button onclick="cargarTablasFirebase()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold px-3 py-2 rounded-xl border border-zinc-700 transition cursor-pointer">
                         🔄 Actualizar
                     </button>
                 </div>
@@ -261,8 +281,8 @@
                         <div id="admin-top10-container" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
                     </div>
                     <div class="flex justify-end pt-2">
-                        <button onclick="ejecutarCalculoAutomaticoPuntos()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
-                            ⚡ Guardar Resultados y Calcular Puntos
+                        <button onclick="ejecutarCalculoAutomaticoFirebase()" class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
+                            ⚡ Guardar Resultados y Calcular Puntos (Nube)
                         </button>
                     </div>
                 </div>
@@ -309,8 +329,10 @@
         </div>
     </div>
 
-    <!-- Script Principal -->
-    <script>
+    <!-- Script Principal con Firebase Firestore -->
+    <script type="module">
+        import { doc, setDoc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
         const ADMIN_USER = "daniel"; 
 
         const CALENDARIO_F1_2026 = [
@@ -363,8 +385,8 @@
             configurarNavegacion();
             verificarLimitesTiempo();
             actualizarEstadoSesionUI();
-            cargarListaParticipantesQueVotaron();
-            cargarTablas();
+            cargarListaParticipantesFirebase();
+            cargarTablasFirebase();
         });
 
         function inicializarTextosDinamicos() {
@@ -527,7 +549,7 @@
                 ocultarTodo();
                 seccionTabla?.classList.remove("hidden");
                 navTabla.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold text-xs";
-                cargarTablas();
+                cargarTablasFirebase();
             });
 
             navReglas?.addEventListener("click", (e) => {
@@ -560,7 +582,7 @@
             const btnActivo = document.getElementById(`nav-m-${seccion}`);
             if (btnActivo) btnActivo.className = "flex flex-col items-center text-red-500 space-y-0.5 cursor-pointer flex-1";
 
-            if (seccion === 'tabla') cargarTablas();
+            if (seccion === 'tabla') cargarTablasFirebase();
         }
 
         function verificarLimitesTiempo() {
@@ -623,7 +645,7 @@
             localStorage.setItem("prode_usuario_actual", user);
             cerrarModalAuth();
             actualizarEstadoSesionUI();
-            cargarListaParticipantesQueVotaron();
+            cargarListaParticipantesFirebase();
             alert(`¡Sesión iniciada correctamente como: ${user}!`);
         }
 
@@ -640,7 +662,7 @@
                         localStorage.removeItem("prode_usuario_actual");
                         usuarioActual = null;
                         actualizarEstadoSesionUI();
-                        cargarListaParticipantesQueVotaron();
+                        cargarListaParticipantesFirebase();
                         alert("Sesión cerrada.");
                     };
                 }
@@ -669,7 +691,7 @@
             }
         }
 
-        window.guardarPoleLocal = function() {
+        window.guardarPoleFirebase = async function() {
             if (!usuarioActual) {
                 alert("Debes iniciar sesión para guardar tu pronóstico.");
                 abrirModalAuth();
@@ -686,13 +708,33 @@
                 return;
             }
 
-            let key = `prode_${ID_GP_ACTUAL}_${usuarioActual}_pole`;
-            localStorage.setItem(key, poleVal);
-            registrarUsuarioQueVoto(usuarioActual);
-            alert("¡Pronóstico de Pole guardado con éxito!");
+            try {
+                const docRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_${usuarioActual}`);
+                let docSnap = await getDoc(docRef);
+                let data = docSnap.exists() ? docSnap.data() : {};
+                
+                data.usuario = usuarioActual;
+                data.pole = poleVal;
+                
+                // Actualizar lista de participantes en Firestore
+                let metaRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_meta`);
+                let metaSnap = await getDoc(metaRef);
+                let participantes = metaSnap.exists() ? (metaSnap.data().participantes || []) : [];
+                if (!participantes.includes(usuarioActual)) {
+                    participantes.push(usuarioActual);
+                    await setDoc(metaRef, { participantes }, { merge: true });
+                }
+
+                await setDoc(docRef, data, { merge: true });
+                alert("¡Pronóstico de Pole guardado en la nube con éxito!");
+                cargarListaParticipantesFirebase();
+            } catch (e) {
+                console.error(e);
+                alert("Error al guardar en Firebase: " + e.message);
+            }
         }
 
-        window.guardarTop10Local = function() {
+        window.guardarTop10Firebase = async function() {
             if (!usuarioActual) {
                 alert("Debes iniciar sesión para guardar tu pronóstico.");
                 abrirModalAuth();
@@ -718,47 +760,61 @@
                 return;
             }
 
-            let key = `prode_${ID_GP_ACTUAL}_${usuarioActual}_top10`;
-            localStorage.setItem(key, JSON.stringify(top10));
-            registrarUsuarioQueVoto(usuarioActual);
-            alert("¡Pronóstico de Top 10 guardado con éxito!");
-        }
+            try {
+                const docRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_${usuarioActual}`);
+                let docSnap = await getDoc(docRef);
+                let data = docSnap.exists() ? docSnap.data() : {};
+                
+                data.usuario = usuarioActual;
+                data.top10 = top10;
 
-        function registrarUsuarioQueVoto(user) {
-            let keyList = `prode_${ID_GP_ACTUAL}_participantes`;
-            let lista = JSON.parse(localStorage.getItem(keyList) || "[]");
-            if (!lista.includes(user)) {
-                lista.push(user);
-                localStorage.setItem(keyList, JSON.stringify(lista));
+                let metaRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_meta`);
+                let metaSnap = await getDoc(metaRef);
+                let participantes = metaSnap.exists() ? (metaSnap.data().participantes || []) : [];
+                if (!participantes.includes(usuarioActual)) {
+                    participantes.push(usuarioActual);
+                    await setDoc(metaRef, { participantes }, { merge: true });
+                }
+
+                await setDoc(docRef, data, { merge: true });
+                alert("¡Pronóstico de Top 10 guardado en la nube con éxito!");
+                cargarListaParticipantesFirebase();
+            } catch (e) {
+                console.error(e);
+                alert("Error al guardar en Firebase: " + e.message);
             }
-            cargarListaParticipantesQueVotaron();
         }
 
-        function cargarListaParticipantesQueVotaron() {
-            let keyList = `prode_${ID_GP_ACTUAL}_participantes`;
-            let lista = JSON.parse(localStorage.getItem(keyList) || "[]");
+        async function cargarListaParticipantesFirebase() {
             const contadorEl = document.getElementById("contador-participantes-votos");
             const avatarsEl = document.getElementById("lista-avatars-votos");
+            try {
+                const metaRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_meta`);
+                const metaSnap = await getDoc(metaRef);
+                let lista = metaSnap.exists() ? (metaSnap.data().participantes || []) : [];
 
-            if (contadorEl) {
-                contadorEl.textContent = `${lista.length} participante(s) han registrado pronósticos en esta fecha.`;
-            }
-            if (avatarsEl) {
-                avatarsEl.innerHTML = "";
-                if (lista.length === 0) {
-                    avatarsEl.innerHTML = '<span class="text-xs text-zinc-500 italic">Ningún usuario ha votado todavía.</span>';
-                } else {
-                    lista.forEach(u => {
-                        let span = document.createElement("span");
-                        span.className = "bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center space-x-1";
-                        span.innerHTML = `<span>🟢</span><span>${u}</span>`;
-                        avatarsEl.appendChild(span);
-                    });
+                if (contadorEl) {
+                    contadorEl.textContent = `${lista.length} participante(s) han registrado pronósticos en esta fecha.`;
                 }
+                if (avatarsEl) {
+                    avatarsEl.innerHTML = "";
+                    if (lista.length === 0) {
+                        avatarsEl.innerHTML = '<span class="text-xs text-zinc-500 italic">Ningún usuario ha votado todavía.</span>';
+                    } else {
+                        lista.forEach(u => {
+                            let span = document.createElement("span");
+                            span.className = "bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center space-x-1";
+                            span.innerHTML = `<span>🟢</span><span>${u}</span>`;
+                            avatarsEl.appendChild(span);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error(e);
             }
         }
 
-        window.abrirModalMiPronostico = function() {
+        window.abrirModalMiPronostico = async function() {
             if (!usuarioActual) {
                 alert("Inicia sesión para ver tu pronóstico guardado.");
                 abrirModalAuth();
@@ -768,39 +824,45 @@
             const contenedor = document.getElementById("contenido-mi-pronostico");
             if (!contenedor) return;
 
-            let poleKey = `prode_${ID_GP_ACTUAL}_${usuarioActual}_pole`;
-            let top10Key = `prode_${ID_GP_ACTUAL}_${usuarioActual}_top10`;
+            try {
+                const docRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_${usuarioActual}`);
+                const docSnap = await getDoc(docRef);
+                let data = docSnap.exists() ? docSnap.data() : {};
 
-            let poleGuardado = localStorage.getItem(poleKey) || "No registrado";
-            let top10Guardado = JSON.parse(localStorage.getItem(top10Key) || "{}");
+                let poleGuardado = data.pole || "No registrado";
+                let top10Guardado = data.top10 || {};
 
-            let top10Html = "";
-            if (Object.keys(top10Guardado).length === 0) {
-                top10Html = '<p class="text-xs text-zinc-500 italic">No has guardado Top 10 para esta fecha.</p>';
-            } else {
-                top10Html = '<div class="space-y-1.5">';
-                for (let i = 1; i <= 10; i++) {
-                    top10Html += `<div class="flex items-center justify-between bg-zinc-900 p-2 rounded-lg border border-zinc-800 text-xs">
-                        <span class="font-bold text-red-500">Puesto ${i}</span>
-                        <span class="text-zinc-200">${top10Guardado[i] || '---'}</span>
-                    </div>`;
+                let top10Html = "";
+                if (Object.keys(top10Guardado).length === 0) {
+                    top10Html = '<p class="text-xs text-zinc-500 italic">No has guardado Top 10 para esta fecha.</p>';
+                } else {
+                    top10Html = '<div class="space-y-1.5">';
+                    for (let i = 1; i <= 10; i++) {
+                        top10Html += `<div class="flex items-center justify-between bg-zinc-900 p-2 rounded-lg border border-zinc-800 text-xs">
+                            <span class="font-bold text-red-500">Puesto ${i}</span>
+                            <span class="text-zinc-200">${top10Guardado[i] || '---'}</span>
+                        </div>`;
+                    }
+                    top10Html += '</div>';
                 }
-                top10Html += '</div>';
-            }
 
-            contenedor.innerHTML = `
-                <div class="space-y-3">
-                    <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800">
-                        <span class="block text-[10px] uppercase font-bold text-zinc-400">Poleman Pronosticado</span>
-                        <span class="text-xs font-bold text-white">${poleGuardado}</span>
+                contenedor.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                            <span class="block text-[10px] uppercase font-bold text-zinc-400">Poleman Pronosticado</span>
+                            <span class="text-xs font-bold text-white">${poleGuardado}</span>
+                        </div>
+                        <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-2">
+                            <span class="block text-[10px] uppercase font-bold text-zinc-400">Top 10 Pronosticado</span>
+                            ${top10Html}
+                        </div>
                     </div>
-                    <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-2">
-                        <span class="block text-[10px] uppercase font-bold text-zinc-400">Top 10 Pronosticado</span>
-                        ${top10Html}
-                    </div>
-                </div>
-            `;
-            document.getElementById("modal-mi-pronostico")?.classList.remove("hidden");
+                `;
+                document.getElementById("modal-mi-pronostico")?.classList.remove("hidden");
+            } catch (e) {
+                console.error(e);
+                alert("Error al cargar tu pronóstico.");
+            }
         }
 
         window.cerrarModalMiPronostico = function() {
@@ -826,7 +888,7 @@
             }
         }
 
-        window.ejecutarCalculoAutomaticoPuntos = function() {
+        window.ejecutarCalculoAutomaticoFirebase = async function() {
             if (usuarioActual !== ADMIN_USER) {
                 alert("Acceso denegado. Solo el administrador puede calcular puntos.");
                 return;
@@ -847,149 +909,162 @@
                 return;
             }
 
-            let keyList = `prode_${ID_GP_ACTUAL}_participantes`;
-            let listaParticipantes = JSON.parse(localStorage.getItem(keyList) || "[]");
-            let resultadosFecha = {};
+            try {
+                const metaRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_meta`);
+                const metaSnap = await getDoc(metaRef);
+                let listaParticipantes = metaSnap.exists() ? (metaSnap.data().participantes || []) : [];
+                let resultadosFecha = {};
 
-            listaParticipantes.forEach(user => {
-                let pts = 0;
-                let poleUser = localStorage.getItem(`prode_${ID_GP_ACTUAL}_${user}_pole`);
-                let top10User = JSON.parse(localStorage.getItem(`prode_${ID_GP_ACTUAL}_${user}_top10`) || "{}");
+                for (let user of listaParticipantes) {
+                    let pts = 0;
+                    let docRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_${user}`);
+                    let docSnap = await getDoc(docRef);
+                    if (!docSnap.exists()) continue;
+                    let userData = docSnap.data();
 
-                // Cálculo Pole (+25 pts)
-                if (poleUser && poleUser === poleReal) {
-                    pts += 25;
-                }
+                    let poleUser = userData.pole;
+                    let top10User = userData.top10 || {};
 
-                // Cálculo Top 10 y Matriz de diferencias
-                let exactPodiumCount = 0;
-                let exactTop5Count = true;
+                    // Cálculo Pole (+25 pts)
+                    if (poleUser && poleUser === poleReal) {
+                        pts += 25;
+                    }
 
-                for (let i = 1; i <= 10; i++) {
-                    let pUser = top10User[i];
-                    let pReal = top10Real[i];
+                    // Cálculo Top 10 y Matriz de diferencias
+                    let exactPodiumCount = 0;
+                    let exactTop5Count = true;
 
-                    if (pUser && pReal) {
-                        if (pUser === pReal) {
-                            pts += 25; // Acierto exacto
-                            if (i <= 3) exactPodiumCount++;
-                        } else {
-                            // Buscar a qué distancia real quedó
-                            let posRealIndex = -1;
-                            for (let r = 1; r <= 10; r++) {
-                                if (top10Real[r] === pUser) {
-                                    posRealIndex = r;
-                                    break;
+                    for (let i = 1; i <= 10; i++) {
+                        let pUser = top10User[i];
+                        let pReal = top10Real[i];
+
+                        if (pUser && pReal) {
+                            if (pUser === pReal) {
+                                pts += 25;
+                                if (i <= 3) exactPodiumCount++;
+                            } else {
+                                let posRealIndex = -1;
+                                for (let r = 1; r <= 10; r++) {
+                                    if (top10Real[r] === pUser) {
+                                        posRealIndex = r;
+                                        break;
+                                    }
                                 }
+                                if (posRealIndex !== -1) {
+                                    let diff = Math.abs(i - posRealIndex);
+                                    if (diff === 1) pts += 15;
+                                    else if (diff === 2) pts += 10;
+                                    else if (diff === 3) pts += 5;
+                                }
+                                if (i <= 5) exactTop5Count = false;
                             }
-                            if (posRealIndex !== -1) {
-                                let diff = Math.abs(i - posRealIndex);
-                                if (diff === 1) pts += 15;
-                                else if (diff === 2) pts += 10;
-                                else if (diff === 3) pts += 5;
-                            }
+                        } else {
                             if (i <= 5) exactTop5Count = false;
                         }
-                    } else {
-                        if (i <= 5) exactTop5Count = false;
                     }
+
+                    if (exactPodiumCount === 3) pts += 25;
+                    if (exactTop5Count) pts += 50;
+
+                    resultadosFecha[user] = pts;
+
+                    // Actualizar puntos en la tabla general de la nube
+                    let genRef = doc(window.db, "pronosticos", `general_${user}`);
+                    let genSnap = await getDoc(genRef);
+                    let ptsAcumuladosPrevios = genSnap.exists() ? (genSnap.data().puntos || 0) : 0;
+                    
+                    let fechaPuntajeKey = `pts_${ID_GP_ACTUAL}`;
+                    let puntosAnterioresFecha = genSnap.exists() ? (genSnap.data()[fechaPuntajeKey] || 0) : 0;
+                    
+                    let nuevosAcumulados = ptsAcumuladosPrevios - puntosAnterioresFecha + pts;
+                    await setDoc(genRef, { usuario: user, puntos: nuevosAcumulados, [fechaPuntajeKey]: pts }, { merge: true });
                 }
 
-                // Bonos especiales
-                if (exactPodiumCount === 3) pts += 25;
-                if (exactTop5Count) pts += 50;
-
-                resultadosFecha[user] = pts;
-
-                // Acumular en tabla general
-                let genKey = `prode_general_${user}`;
-                let ptsAcumuladosPrevios = parseInt(localStorage.getItem(genKey) || "0");
-                // Para evitar duplicar si se recalcula varias veces, guardamos el puntaje de la fecha de forma independiente
-                let fechaPuntajeKey = `prode_pts_${ID_GP_ACTUAL}_${user}`;
-                let puntosAnterioresFecha = parseInt(localStorage.getItem(fechaPuntajeKey) || "0");
-                
-                let nuevosAcumulados = ptsAcumuladosPrevios - puntosAnterioresFecha + pts;
-                localStorage.setItem(genKey, nuevosAcumulados);
-                localStorage.setItem(fechaPuntajeKey, pts);
-            });
-
-            localStorage.setItem(`prode_resultados_fecha_${ID_GP_ACTUAL}`, JSON.stringify(resultadosFecha));
-            alert("¡Resultados reales guardados y puntuaciones calculadas con éxito!");
-            cargarTablas();
+                // Guardar resultados de la fecha
+                await setDoc(doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_resultados`), { resultados: resultadosFecha }, { merge: true });
+                alert("¡Resultados calculados y guardados en la nube con éxito!");
+                cargarTablasFirebase();
+            } catch (e) {
+                console.error(e);
+                alert("Error al calcular puntos: " + e.message);
+            }
         }
 
-        window.cargarTablas = function() {
+        window.cargarTablasFirebase = async function() {
             // Cargar Tabla de la Fecha
             const listaFechaEl = document.getElementById("lista-tabla-fecha");
-            let resultadosFecha = JSON.parse(localStorage.getItem(`prode_resultados_fecha_${ID_GP_ACTUAL}`) || "{}");
-            
-            let arrayFecha = Object.keys(resultadosFecha).map(u => ({ usuario: u, puntos: resultadosFecha[u] }));
-            arrayFecha.sort((a, b) => b.puntos - a.puntos);
+            try {
+                const resRef = doc(window.db, "pronosticos", `${ID_GP_ACTUAL}_resultados`);
+                const resSnap = await getDoc(resRef);
+                let resultadosFecha = resSnap.exists() ? (resSnap.data().resultados || {}) : {};
 
-            if (arrayFecha.length === 0) {
-                listaFechaEl.innerHTML = '<p class="text-xs text-zinc-500 italic py-4 text-center">No hay resultados calculados aún para esta fecha.</p>';
-            } else {
-                let html = `<table class="w-full text-left text-xs">
-                    <thead class="bg-zinc-900 text-zinc-400 uppercase text-[10px] border-b border-zinc-800">
-                        <tr>
-                            <th class="p-3">Pos</th>
-                            <th class="p-3">Participante</th>
-                            <th class="p-3 text-right">Puntos Fecha</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-zinc-800/60">`;
-                arrayFecha.forEach((item, index) => {
-                    html += `<tr class="hover:bg-zinc-900/40">
-                        <td class="p-3 font-black text-red-500">#${index + 1}</td>
-                        <td class="p-3 font-bold text-white">${item.usuario}</td>
-                        <td class="p-3 text-right font-black text-green-400">${item.puntos} pts</td>
-                    </tr>`;
-                });
-                html += `</tbody></table>`;
-                listaFechaEl.innerHTML = html;
-            }
+                let arrayFecha = Object.keys(resultadosFecha).map(u => ({ usuario: u, puntos: resultadosFecha[u] }));
+                arrayFecha.sort((a, b) => b.puntos - a.puntos);
 
-            // Cargar Tabla General
-            const listaGeneralEl = document.getElementById("lista-tabla-general");
-            let keyList = `prode_${ID_GP_ACTUAL}_participantes`;
-            // Recopilar todos los usuarios con puntaje general en localStorage
-            let todosUsuarios = new Set(JSON.parse(localStorage.getItem(keyList) || "[]"));
-            // Buscar en todo el localStorage si hay más usuarios con puntaje general
-            for (let i = 0; i < localStorage.length; i++) {
-                let k = localStorage.key(i);
-                if (k.startsWith("prode_general_")) {
-                    todosUsuarios.add(k.replace("prode_general_", ""));
+                if (arrayFecha.length === 0) {
+                    listaFechaEl.innerHTML = '<p class="text-xs text-zinc-500 italic py-4 text-center">No hay resultados calculados aún para esta fecha en la nube.</p>';
+                } else {
+                    let html = `<table class="w-full text-left text-xs">
+                        <thead class="bg-zinc-900 text-zinc-400 uppercase text-[10px] border-b border-zinc-800">
+                            <tr>
+                                <th class="p-3">Pos</th>
+                                <th class="p-3">Participante</th>
+                                <th class="p-3 text-right">Puntos Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-800/60">`;
+                    arrayFecha.forEach((item, index) => {
+                        html += `<tr class="hover:bg-zinc-900/40">
+                            <td class="p-3 font-black text-red-500">#${index + 1}</td>
+                            <td class="p-3 font-bold text-white">${item.usuario}</td>
+                            <td class="p-3 text-right font-black text-green-400">${item.puntos} pts</td>
+                        </tr>`;
+                    });
+                    html += `</tbody></table>`;
+                    listaFechaEl.innerHTML = html;
                 }
+            } catch (e) {
+                console.error(e);
             }
 
-            let arrayGeneral = [];
-            todosUsuarios.forEach(u => {
-                let ptsGen = parseInt(localStorage.getItem(`prode_general_${u}`) || "0");
-                arrayGeneral.push({ usuario: u, puntos: ptsGen });
-            });
-            arrayGeneral.sort((a, b) => b.puntos - a.puntos);
-
-            if (arrayGeneral.length === 0) {
-                listaGeneralEl.innerHTML = '<p class="text-xs text-zinc-500 italic py-4 text-center">No hay puntajes generales registrados aún.</p>';
-            } else {
-                let htmlGen = `<table class="w-full text-left text-xs">
-                    <thead class="bg-zinc-900 text-zinc-400 uppercase text-[10px] border-b border-zinc-800">
-                        <tr>
-                            <th class="p-3">Pos</th>
-                            <th class="p-3">Participante</th>
-                            <th class="p-3 text-right">Puntos Totales</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-zinc-800/60">`;
-                arrayGeneral.forEach((item, index) => {
-                    htmlGen += `<tr class="hover:bg-zinc-900/40">
-                        <td class="p-3 font-black text-red-500">#${index + 1}</td>
-                        <td class="p-3 font-bold text-white">${item.usuario}</td>
-                        <td class="p-3 text-right font-black text-red-500">${item.puntos} pts</td>
-                    </tr>`;
+            // Cargar Tabla General desde Firestore
+            const listaGeneralEl = document.getElementById("lista-tabla-general");
+            try {
+                const querySnapshot = await getDocs(collection(window.db, "pronosticos"));
+                let arrayGeneral = [];
+                querySnapshot.forEach((d) => {
+                    let id = d.id;
+                    if (id.startsWith("general_")) {
+                        let data = d.data();
+                        arrayGeneral.push({ usuario: data.usuario, puntos: data.puntos || 0 });
+                    }
                 });
-                htmlGen += `</tbody></table>`;
-                listaGeneralEl.innerHTML = htmlGen;
+                arrayGeneral.sort((a, b) => b.puntos - a.puntos);
+
+                if (arrayGeneral.length === 0) {
+                    listaGeneralEl.innerHTML = '<p class="text-xs text-zinc-500 italic py-4 text-center">No hay puntajes generales registrados aún en la nube.</p>';
+                } else {
+                    let htmlGen = `<table class="w-full text-left text-xs">
+                        <thead class="bg-zinc-900 text-zinc-400 uppercase text-[10px] border-b border-zinc-800">
+                            <tr>
+                                <th class="p-3">Pos</th>
+                                <th class="p-3">Participante</th>
+                                <th class="p-3 text-right">Puntos Totales</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-800/60">`;
+                    arrayGeneral.forEach((item, index) => {
+                        htmlGen += `<tr class="hover:bg-zinc-900/40">
+                            <td class="p-3 font-black text-red-500">#${index + 1}</td>
+                            <td class="p-3 font-bold text-white">${item.usuario}</td>
+                            <td class="p-3 text-right font-black text-red-500">${item.puntos} pts</td>
+                        </tr>`;
+                    });
+                    htmlGen += `</tbody></table>`;
+                    listaGeneralEl.innerHTML = htmlGen;
+                }
+            } catch (e) {
+                console.error(e);
             }
         }
     </script>
