@@ -1,46 +1,344 @@
-<!DOCTYPE html><html lang="es"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>PRODE F1 SEASON 2026</title>    <!-- Tailwind CSS -->    <script src="https://cdn.tailwindcss.com"></script>    <!-- Firebase SDKs y Lógica Global -->    <script type="module">        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";        import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRODE F1 - TEMPORADA 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white font-sans min-h-screen selection:bg-red-600 selection:text-white">
 
-        const firebaseConfig = {            apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",            authDomain: "prode-24c51.firebaseapp.com",            databaseURL: "https://prode-24c51-default-rtdb.firebaseio.com",            projectId: "prode-24c51",            storageBucket: "prode-24c51.firebasestorage.app",            messagingSenderId: "886164589723",            appId: "1:886164589723:web:34ce1bfb7c5ac88fc14a3e",            measurementId: "G-8KMWYK30R5"        };
+    <!-- HEADER -->
+    <header class="border-b border-zinc-800 bg-zinc-950 px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <div class="flex items-center space-x-3">
+            <span class="bg-red-600 p-2 rounded-xl text-white font-black italic shadow-lg shadow-red-600/40 text-sm">🏁</span>
+            <h1 class="text-lg font-black tracking-wider uppercase italic">PRODE F1 <span class="text-red-600 font-bold">2026</span></h1>
+        </div>
+        <nav class="hidden md:flex space-x-6 text-xs font-semibold">
+            <a href="#" id="nav-pronostico" class="text-red-500 border-b-2 border-red-600 pb-1 font-bold">Mi Pronóstico</a>
+            <a href="#" id="nav-tabla" class="text-zinc-400 hover:text-white transition pb-1">Tabla General</a>
+            <a href="#" id="nav-reglas" class="text-zinc-400 hover:text-white transition pb-1">Reglas y Puntuación</a>
+        </nav>
+        <div>
+            <button id="auth-btn" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/30 cursor-pointer">
+                Cargando...
+            </button>
+        </div>
+    </header>
 
-        const app = initializeApp(firebaseConfig);        const auth = getAuth(app);        const db = getFirestore(app);        const googleProvider = new GoogleAuthProvider();
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+                
+        <!-- SECCIÓN 1: MI PRONÓSTICO -->
+        <div id="seccion-pronostico" class="space-y-6">
+            <div class="bg-gradient-to-r from-zinc-900 via-zinc-900 to-black border border-zinc-800 p-6 rounded-2xl relative overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div>
+                    <span class="bg-red-950 text-red-500 text-[10px] px-3 py-1 rounded-full border border-red-800/60 font-black uppercase tracking-widest">Gran Premio 2026</span>
+                    <h2 class="text-2xl md:text-3xl font-black mt-2 tracking-tight uppercase">Arma tu Prode de Carrera</h2>
+                    <p class="text-zinc-400 text-xs mt-1">Selecciona el Poleman (Etapa 1) y tu Top 10 oficial (Etapa 2).</p>
+                </div>
+                                
+                <div class="flex space-x-3">
+                    <button onclick="guardarPronosticoFirestore()" class="bg-red-600 hover:bg-red-700 text-white font-black px-5 py-2.5 rounded-xl text-xs shadow-xl shadow-red-600/30 transition cursor-pointer uppercase tracking-wider">
+                        Guardar Pronóstico
+                    </button>
+                    <button onclick="reiniciarFormulario()" class="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold px-4 py-2.5 rounded-xl text-xs border border-zinc-700 transition cursor-pointer uppercase">
+                        Reiniciar
+                    </button>
+                </div>
+            </div>
 
-        const pilotos2026 = [            "Lando Norris #1 (McLaren)",            "Oscar Piastri #81 (McLaren)",            "George Russell #63 (Mercedes)",            "Kimi Antonelli #12 (Mercedes)",            "Charles Leclerc #16 (Ferrari)",            "Lewis Hamilton #44 (Ferrari)",            "Max Verstappen #3 (Red Bull Racing)",            "Isack Hadjar #6 (Red Bull Racing)",            "Fernando Alonso #14 (Aston Martin)",            "Lance Stroll #18 (Aston Martin)",            "Pierre Gasly #10 (Alpine)",            "Franco Colapinto #43 (Alpine)",            "Alexander Albon #23 (Williams)",            "Carlos Sainz #55 (Williams)",            "Liam Lawson #30 (Racing Bulls)",            "Arvid Lindblad #41 (Racing Bulls)",            "Esteban Ocon #31 (Haas F1 Team)",            "Oliver Bearman #87 (Haas F1 Team)",            "Nico Hülkenberg #27 (Audi)",            "Gabriel Bortoleto #5 (Audi)",            "Sergio Pérez #11 (Cadillac)",            "Valtteri Bottas #77 (Cadillac)"        ];
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- COLUMNA IZQUIERDA: POLE Y PARRILLA -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-red-600 text-white font-black text-[10px] px-2.5 py-1 rounded-lg">01</span>
+                            <h3 class="font-black text-xs uppercase tracking-wider">Poleman (Clasificación)</h3>
+                            <span class="text-[10px] bg-zinc-900 text-zinc-400 px-2.5 py-1 rounded-lg border border-zinc-800 font-bold">+25 pts</span>
+                        </div>
+                        <select id="pole-select" class="w-full bg-black text-white border border-zinc-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-red-600 transition">
+                            <option value="">-- Selecciona el Poleman --</option>
+                        </select>
+                    </div>
 
-        document.addEventListener("DOMContentLoaded", () => {            inicializarInterfaz();            configurarAutenticacion(auth, db);            configurarNavegacion();        });
+                    <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-black text-xs uppercase tracking-wider">🏎️ Parrilla 2026 (Clic para asignar)</h3>
+                            <span class="text-[10px] text-zinc-400 bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-800 font-bold">22 Pilotos</span>
+                        </div>
+                        <div>
+                            <input type="text" id="buscar-piloto" placeholder="Buscar piloto..." class="w-full bg-black text-white text-xs border border-zinc-700 rounded-xl px-3 py-2 focus:outline-none focus:border-red-600 transition">
+                        </div>
+                        <div id="parrilla-container" class="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                            <!-- Generado por JS -->
+                        </div>
+                    </div>
+                </div>
 
-        function inicializarInterfaz() {            const poleSelect = document.getElementById("pole-select");            const top10Container = document.getElementById("top-10-container");            const buscarPilotoInput = document.getElementById("buscar-piloto");
+                <!-- COLUMNA DERECHA: TOP 10 -->
+                <div class="lg:col-span-7">
+                    <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl shadow-xl flex flex-col h-full">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <span class="bg-red-600 text-white font-black text-[10px] px-2.5 py-1 rounded-lg">02</span>
+                                <h3 class="font-black text-sm uppercase tracking-wider inline-block ml-1">Top 10 de Carrera</h3>
+                            </div>
+                            <span id="contador-completados" class="text-[11px] font-bold bg-black text-zinc-300 px-3 py-1.5 rounded-full border border-zinc-800">0 / 10 completados</span>
+                        </div>
+                        <div id="top-10-container" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                            <!-- Generado por JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            if (poleSelect) {                poleSelect.innerHTML = '<option value="">-- Selecciona el Poleman --</option>';                pilotos2026.forEach(piloto => {                    let opt = document.createElement("option");                    opt.value = piloto;                    opt.textContent = piloto;                    poleSelect.appendChild(opt);                });            }
+        <!-- SECCIÓN 2: TABLA GENERAL -->
+        <div id="seccion-tabla" class="space-y-4 hidden">
+            <div class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl shadow-xl space-y-4">
+                <h2 class="text-xl font-black uppercase tracking-wider">Tabla General y Pronósticos</h2>
+                <p class="text-zinc-400 text-xs">Aquí puedes ver los pronósticos guardados de todos los participantes de la comunidad.</p>
+                <div id="lista-tabla-general"></div>
+            </div>
+        </div>
 
-            if (top10Container) {                top10Container.innerHTML = "";                for (let i = 1; i <= 10; i++) {                    let div = document.createElement("div");                    div.className = "flex items-center space-x-2 bg-[#18181b] p-2 rounded-lg border border-zinc-800";                                        let optionsHtml = '<option value="">-- Puesto ' + i + ' --</option>';                    pilotos2026.forEach(p => {                        optionsHtml += '<option value="' + p + '">' + p + '</option>';                    });
+        <!-- SECCIÓN 3: REGLAS Y PUNTUACIÓN -->
+        <div id="seccion-reglas" class="space-y-4 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl space-y-2 shadow-xl">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-red-500 font-bold">🏁</span>
+                        <h3 class="font-black text-sm uppercase tracking-wider">Etapa 1: Poleman (25 Puntos)</h3>
+                    </div>
+                    <p class="text-xs text-zinc-300 leading-relaxed">Si aciertas exactamente el piloto que consigue la Pole Position el sábado, obtienes 25 puntos directos.</p>
+                </div>
 
-                    div.innerHTML = `                        <span class="w-6 h-6 flex items-center justify-center bg-red-600 text-white font-bold rounded text-xs">${i < 10 ? '0' + i : i}</span>                        <select id="puesto-${i}" onchange="actualizarContadorCompletados()" class="w-full bg-zinc-900 text-white border border-zinc-700 rounded p-1.5 text-xs focus:outline-none focus:border-red-500">                            ${optionsHtml}                        </select>                    `;                    top10Container.appendChild(div);                }            }
+                <div class="bg-zinc-950 border border-zinc-800 p-5 rounded-2xl space-y-2 shadow-xl">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-red-500 font-bold">📊</span>
+                        <h3 class="font-black text-sm uppercase tracking-wider">Etapa 2: Top 10 (Matriz de Diferencial)</h3>
+                    </div>
+                    <p class="text-xs text-zinc-300">Los puntos varían según la precisión del puesto:</p>
+                    <div class="grid grid-cols-2 gap-1.5 bg-black p-3 rounded-xl text-[11px] text-zinc-300 border border-zinc-800">
+                        <div>• Exacta: <strong class="text-white">+25 pts</strong></div>
+                        <div>• ±1 dif: <strong class="text-white">+18 pts</strong></div>
+                        <div>• ±2 dif: <strong class="text-white">+15 pts</strong></div>
+                        <div>• ±3 dif: <strong class="text-white">+12 pts</strong></div>
+                        <div>• ±4 dif: <strong class="text-white">+10 pts</strong></div>
+                        <div>• ±5 dif: <strong class="text-white">+8 pts</strong></div>
+                        <div>• ±6 dif: <strong class="text-white">+6 pts</strong></div>
+                        <div>• ±7 dif: <strong class="text-white">+4 pts</strong></div>
+                        <div>• ±8 dif: <strong class="text-white">+2 pts</strong></div>
+                        <div>• ±9 dif: <strong class="text-white">+1 pt</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDKs y Lógica Global corregida para despliegue estático -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8mscPg-_dQZ59bpywUGSlke8Bz8ZOUeA",
+            authDomain: "prode-24c51.firebaseapp.com",
+            databaseURL: "https://prode-24c51-default-rtdb.firebaseio.com",
+            projectId: "prode-24c51",
+            storageBucket: "prode-24c51.firebasestorage.app",
+            messagingSenderId: "886164589723",
+            appId: "1:886164589723:web:34ce1bfb7c5ac88fc14a3e",
+            measurementId: "G-8KMWYK30R5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        const pilotos2026 = [
+            "Lando Norris #1 (McLaren)",
+            "Oscar Piastri #81 (McLaren)",
+            "George Russell #63 (Mercedes)",
+            "Kimi Antonelli #12 (Mercedes)",
+            "Charles Leclerc #16 (Ferrari)",
+            "Lewis Hamilton #44 (Ferrari)",
+            "Max Verstappen #3 (Red Bull Racing)",
+            "Isack Hadjar #6 (Red Bull Racing)",
+            "Fernando Alonso #14 (Aston Martin)",
+            "Lance Stroll #18 (Aston Martin)",
+            "Pierre Gasly #10 (Alpine)",
+            "Franco Colapinto #43 (Alpine)",
+            "Alexander Albon #23 (Williams)",
+            "Carlos Sainz #55 (Williams)",
+            "Liam Lawson #30 (Racing Bulls)",
+            "Arvid Lindblad #41 (Racing Bulls)",
+            "Esteban Ocon #31 (Haas F1 Team)",
+            "Oliver Bearman #87 (Haas F1 Team)",
+            "Nico Hülkenberg #27 (Audi)",
+            "Gabriel Bortoleto #5 (Audi)",
+            "Sergio Pérez #11 (Cadillac)",
+            "Valtteri Bottas #77 (Cadillac)"
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            inicializarInterfaz();
+            configurarAutenticacion(auth, db);
+            configurarNavegacion();
+        });
+
+        function inicializarInterfaz() {
+            const poleSelect = document.getElementById("pole-select");
+            const top10Container = document.getElementById("top-10-container");
+            const buscarPilotoInput = document.getElementById("buscar-piloto");
+
+            if (poleSelect) {
+                poleSelect.innerHTML = '<option value="">-- Selecciona el Poleman --</option>';
+                pilotos2026.forEach(piloto => {
+                    let opt = document.createElement("option");
+                    opt.value = piloto;
+                    opt.textContent = piloto;
+                    poleSelect.appendChild(opt);
+                });
+            }
+
+            if (top10Container) {
+                top10Container.innerHTML = "";
+                for (let i = 1; i <= 10; i++) {
+                    let div = document.createElement("div");
+                    div.className = "flex items-center space-x-2 bg-zinc-900 p-2.5 rounded-xl border border-zinc-800";
+                    
+                    let optionsHtml = '<option value="">-- Puesto ' + i + ' --</option>';
+                    pilotos2026.forEach(p => {
+                        optionsHtml += '<option value="' + p + '">' + p + '</option>';
+                    });
+
+                    div.innerHTML = `
+                        <span class="w-6 h-6 flex items-center justify-center bg-red-600 text-white font-black rounded-lg text-xs shadow-md shadow-red-600/30">${i < 10 ? '0' + i : i}</span>
+                        <select id="puesto-${i}" onchange="actualizarContadorCompletados()" class="w-full bg-black text-white border border-zinc-700 rounded-lg p-2 text-xs focus:outline-none focus:border-red-600 transition">
+                            ${optionsHtml}
+                        </select>
+                    `;
+                    top10Container.appendChild(div);
+                }
+            }
 
             renderizarParrilla(pilotos2026);
 
-            if (buscarPilotoInput) {                buscarPilotoInput.addEventListener("input", (e) => {                    const texto = e.target.value.toLowerCase();                    const filtrados = pilotos2026.filter(p => p.toLowerCase().includes(texto));                    renderizarParrilla(filtrados);                });            }        }
+            if (buscarPilotoInput) {
+                buscarPilotoInput.addEventListener("input", (e) => {
+                    const texto = e.target.value.toLowerCase();
+                    const filtrados = pilotos2026.filter(p => p.toLowerCase().includes(texto));
+                    renderizarParrilla(filtrados);
+                });
+            }
+        }
 
-        function renderizarParrilla(listaPilotos) {            const parrillaContainer = document.getElementById("parrilla-container");            if (!parrillaContainer) return;                        parrillaContainer.innerHTML = "";            listaPilotos.forEach(piloto => {                let btn = document.createElement("button");                btn.type = "button";                btn.className = "text-left text-[11px] bg-zinc-900 hover:bg-red-950/40 text-zinc-300 hover:text-white p-2 rounded border border-zinc-800 hover:border-red-800/50 transition truncate";                btn.textContent = piloto;                btn.onclick = () => asignarSiguientePuesto(piloto);                parrillaContainer.appendChild(btn);            });        }
+        function renderizarParrilla(listaPilotos) {
+            const parrillaContainer = document.getElementById("parrilla-container");
+            if (!parrillaContainer) return;
+            
+            parrillaContainer.innerHTML = "";
+            listaPilotos.forEach(piloto => {
+                let btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "text-left text-[11px] bg-zinc-900 hover:bg-red-600 text-zinc-300 hover:text-white p-2.5 rounded-lg border border-zinc-800 hover:border-red-500 transition font-medium truncate cursor-pointer shadow-sm";
+                btn.textContent = piloto;
+                btn.onclick = () => asignarSiguientePuesto(piloto);
+                parrillaContainer.appendChild(btn);
+            });
+        }
 
-        window.asignarSiguientePuesto = function(piloto) {            for (let i = 1; i <= 10; i++) {                let select = document.getElementById(`puesto-${i}`);                if (select && !select.value) {                    select.value = piloto;                    actualizarContadorCompletados();                    break;                }            }        }
+        window.asignarSiguientePuesto = function(piloto) {
+            for (let i = 1; i <= 10; i++) {
+                let select = document.getElementById(`puesto-${i}`);
+                if (select && !select.value) {
+                    select.value = piloto;
+                    actualizarContadorCompletados();
+                    break;
+                }
+            }
+        }
 
-        window.actualizarContadorCompletados = function() {            let completados = 0;            for (let i = 1; i <= 10; i++) {                let select = document.getElementById(`puesto-${i}`);                if (select && select.value) completados++;            }            const contadorEl = document.getElementById("contador-completados");            if (contadorEl) contadorEl.textContent = `${completados} / 10 completados`;        }
+        window.actualizarContadorCompletados = function() {
+            let completados = 0;
+            for (let i = 1; i <= 10; i++) {
+                let select = document.getElementById(`puesto-${i}`);
+                if (select && select.value) completados++;
+            }
+            const contadorEl = document.getElementById("contador-completados");
+            if (contadorEl) contadorEl.textContent = `${completados} / 10 completados`;
+        }
 
-        function configurarNavegacion() {            const navPronostico = document.getElementById("nav-pronostico");            const navTabla = document.getElementById("nav-tabla");            const navReglas = document.getElementById("nav-reglas");
+        function configurarNavegacion() {
+            const navPronostico = document.getElementById("nav-pronostico");
+            const navTabla = document.getElementById("nav-tabla");
+            const navReglas = document.getElementById("nav-reglas");
 
-            const seccionPronostico = document.getElementById("seccion-pronostico");            const seccionTabla = document.getElementById("seccion-tabla");            const seccionReglas = document.getElementById("seccion-reglas");
+            const seccionPronostico = document.getElementById("seccion-pronostico");
+            const seccionTabla = document.getElementById("seccion-tabla");
+            const seccionReglas = document.getElementById("seccion-reglas");
 
-            function cambiarVista(activa) {                [navPronostico, navTabla, navReglas].forEach(el => el.className = "text-zinc-400 hover:text-white transition pb-1");                [seccionPronostico, seccionTabla, seccionReglas].forEach(el => el.classList.add("hidden"));
+            function cambiarVista(activa) {
+                [navPronostico, navTabla, navReglas].forEach(el => el.className = "text-zinc-400 hover:text-white transition pb-1 font-medium");
+                [seccionPronostico, seccionTabla, seccionReglas].forEach(el => el.classList.add("hidden"));
 
-                if (activa === 'pronostico') {                    navPronostico.className = "text-red-500 border-b-2 border-red-500 pb-1 font-semibold";                    seccionPronostico.classList.remove("hidden");                } else if (activa === 'tabla') {                    navTabla.className = "text-red-500 border-b-2 border-red-500 pb-1 font-semibold";                    seccionTabla.classList.remove("hidden");                    cargarTablaGeneral();                } else if (activa === 'reglas') {                    navReglas.className = "text-red-500 border-b-2 border-red-500 pb-1 font-semibold";                    seccionReglas.classList.remove("hidden");                }            }
+                if (activa === 'pronostico') {
+                    navPronostico.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                    seccionPronostico.classList.remove("hidden");
+                } else if (activa === 'tabla') {
+                    navTabla.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                    seccionTabla.classList.remove("hidden");
+                    cargarTablaGeneral();
+                } else if (activa === 'reglas') {
+                    navReglas.className = "text-red-500 border-b-2 border-red-600 pb-1 font-bold";
+                    seccionReglas.classList.remove("hidden");
+                }
+            }
 
-            navPronostico.onclick = (e) => { e.preventDefault(); cambiarVista('pronostico'); };            navTabla.onclick = (e) => { e.preventDefault(); cambiarVista('tabla'); };            navReglas.onclick = (e) => { e.preventDefault(); cambiarVista('reglas'); };        }
+            navPronostico.onclick = (e) => { e.preventDefault(); cambiarVista('pronostico'); };
+            navTabla.onclick = (e) => { e.preventDefault(); cambiarVista('tabla'); };
+            navReglas.onclick = (e) => { e.preventDefault(); cambiarVista('reglas'); };
+        }
 
-        function configurarAutenticacion(auth, db) {            const authBtn = document.getElementById("auth-btn");
+        function configurarAutenticacion(auth, db) {
+            const authBtn = document.getElementById("auth-btn");
 
-            onAuthStateChanged(auth, (user) => {                if (user) {                    authBtn.textContent = "Cerrar Sesión (" + user.displayName.split(' ')[0] + ")";                    authBtn.onclick = () => {                        signOut(auth).then(() => alert("Sesión cerrada"));                    };                    cargarPronostico(db, user.uid);                } else {                    authBtn.textContent = "Iniciar Sesión con Google";                    authBtn.onclick = () => {                        signInWithPopup(auth, googleProvider)                        .then((result) => {                            alert("¡Bienvenido, " + result.user.displayName + "!");                        })                        .catch((error) => {                            alert("Error al iniciar sesión con Google: " + error.message);                        });                    };                }            });        }
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    authBtn.textContent = "Cerrar Sesión (" + user.displayName.split(' ')[0] + ")";
+                    authBtn.className = "bg-zinc-800 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-zinc-700 transition shadow cursor-pointer";
+                    authBtn.onclick = () => {
+                        signOut(auth).then(() => alert("Sesión cerrada con éxito"));
+                    };
+                    cargarPronostico(db, user.uid);
+                } else {
+                    authBtn.textContent = "Iniciar Sesión con Google";
+                    authBtn.className = "bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/30 cursor-pointer";
+                    authBtn.onclick = () => {
+                        signInWithPopup(auth, googleProvider)
+                        .then((result) => {
+                            alert("¡Bienvenido, " + result.user.displayName + "!");
+                        })
+                        .catch((error) => {
+                            alert("Error al iniciar sesión: " + error.message);
+                        });
+                    };
+                }
+            });
+        }
 
-        window.guardarPronosticoFirestore = async function() {            const user = auth.currentUser;            if (!user) {                alert("Debes iniciar sesión con Google para guardar el pronóstico.");                return;            }
+        window.guardarPronosticoFirestore = async function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Debes iniciar sesión con Google para guardar tu pronóstico.");
+                return;
+            }
 
             const poleEl = document.getElementById("pole-select");
             const pole = poleEl ? poleEl.value : "";
@@ -52,7 +350,6 @@
             }
 
             try {
-                console.log("Intentando guardar pronóstico para:", user.uid);
                 await setDoc(doc(db, "pronosticos", user.uid), {
                     nombreUsuario: user.displayName || "Anónimo",
                     email: user.email || "",
@@ -63,13 +360,69 @@
                 
                 alert("¡Pronóstico guardado exitosamente en Firestore!");
             } catch (e) {
-                console.error("Error detallado al guardar:", e);
-                alert("Error al guardar: " + e.message);
+                console.error("Error al guardar:", e);
+                alert("Error al guardar el pronóstico: " + e.message);
             }
         }
 
-        async function cargarPronostico(db, uid) {            try {                const docSnap = await getDoc(doc(db, "pronosticos", uid));                if (docSnap.exists()) {                    const data = docSnap.data();                    if (data.pole) document.getElementById("pole-select").value = data.pole;                    if (data.top10) {                        data.top10.forEach((piloto, index) => {                            let sel = document.getElementById(`puesto-${index + 1}`);                            if (sel) sel.value = piloto;                        });                        actualizarContadorCompletados();                    }                }            } catch (e) {                console.error("Error cargando pronóstico previo", e);            }        }
+        async function cargarPronostico(db, uid) {
+            try {
+                const docSnap = await getDoc(doc(db, "pronosticos", uid));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.pole) document.getElementById("pole-select").value = data.pole;
+                    if (data.top10) {
+                        data.top10.forEach((piloto, index) => {
+                            let sel = document.getElementById(`puesto-${index + 1}`);
+                            if (sel) sel.value = piloto;
+                        });
+                        actualizarContadorCompletados();
+                    }
+                }
+            } catch (e) {
+                console.error("Error cargando pronóstico previo", e);
+            }
+        }
 
-        async function cargarTablaGeneral() {            const contenedor = document.getElementById("lista-tabla-general");            contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Cargando pronósticos de la comunidad...</p>";            try {                const querySnapshot = await getDocs(collection(db, "pronosticos"));                if (querySnapshot.empty) {                    contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Aún no hay pronósticos guardados por los usuarios.</p>";                    return;                }                let html = '<div class="space-y-3">';                querySnapshot.forEach((docSnap) => {                    const p = docSnap.data();                    html += `                        <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-2">                            <div>                                <h4 class="font-bold text-white text-base">${p.nombreUsuario || 'Participante'}</h4>                                <p class="text-xs text-zinc-400">Poleman: <span class="text-red-400 font-semibold">${p.pole || 'No definido'}</span></p>                            </div>                            <div class="text-xs text-zinc-400 bg-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-700">                                Top 10 registrado (${p.top10 ? p.top10.filter(Boolean).length : 0}/10 pilotos)                            </div>                        </div>                    `;                });                html += '</div>';                contenedor.innerHTML = html;            } catch (e) {                contenedor.innerHTML = "<p class='text-red-500 text-sm'>Error al cargar la tabla general: " + e.message + "</p>";            }        }
+        async function cargarTablaGeneral() {
+            const contenedor = document.getElementById("lista-tabla-general");
+            contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Cargando pronósticos de la comunidad...</p>";
+            try {
+                const querySnapshot = await getDocs(collection(db, "pronosticos"));
+                if (querySnapshot.empty) {
+                    contenedor.innerHTML = "<p class='text-zinc-400 text-sm'>Aún no hay pronósticos guardados por los participantes.</p>";
+                    return;
+                }
+                let html = '<div class="space-y-3">';
+                querySnapshot.forEach((docSnap) => {
+                    const p = docSnap.data();
+                    html += `
+                        <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                            <div>
+                                <h4 class="font-bold text-white text-base">${p.nombreUsuario || 'Participante'}</h4>
+                                <p class="text-xs text-zinc-400">Poleman: <span class="text-red-500 font-semibold">${p.pole || 'No definido'}</span></p>
+                            </div>
+                            <div class="text-xs text-zinc-300 bg-black px-3 py-1.5 rounded-lg border border-zinc-800">
+                                Top 10 registrado (${p.top10 ? p.top10.filter(Boolean).length : 0}/10 pilotos)
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                contenedor.innerHTML = html;
+            } catch (e) {
+                contenedor.innerHTML = "<p class='text-red-500 text-sm'>Error al cargar la tabla general: " + e.message + "</p>";
+            }
+        }
 
-        window.reiniciarFormulario = function() {            document.getElementById("pole-select").value = "";            for (let i = 1; i <= 10; i++) {                let sel = document.getElementById(`puesto-${i}`);                if (sel) sel.value = "";
+        window.reiniciarFormulario = function() {
+            document.getElementById("pole-select").value = "";
+            for (let i = 1; i <= 10; i++) {
+                let sel = document.getElementById(`puesto-${i}`);
+                if (sel) sel.value = "";
+            }
+            actualizarContadorCompletados();
+        }
+    </script>
+</body>
+</html>
